@@ -4,9 +4,12 @@ Main FastAPI application entry point.
 """
 
 import time
+import uuid
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -42,6 +45,39 @@ app = FastAPI(
     }
 )
 
+# Request ID middleware - add unique ID to each request for tracking
+class RequestIDMiddleware(BaseHTTPMiddleware):
+    """Add unique request ID to each request for tracking and debugging."""
+    
+    async def dispatch(self, request: Request, call_next):
+        # Get request ID from header or generate new one
+        request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        
+        # Add to request state for logging
+        request.state.request_id = request_id
+        
+        # Process request
+        response = await call_next(request)
+        
+        # Add request ID to response headers
+        response.headers["X-Request-ID"] = request_id
+        
+        return response
+
+
+app.add_middleware(RequestIDMiddleware)
+
+# CORS middleware - allow cross-origin requests
+# This is important for browser-based clients and RapidAPI integration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, consider restricting to specific domains
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["X-Request-ID", "X-Processing-Time"],
+)
+
 
 @app.middleware("http")
 async def logging_middleware(request: Request, call_next):
@@ -51,9 +87,15 @@ async def logging_middleware(request: Request, call_next):
     # Get content length from headers (before reading body)
     content_length = int(request.headers.get("content-length", 0))
     
+    # Get request ID from state (set by RequestIDMiddleware)
+    request_id = getattr(request.state, "request_id", "unknown")
+    
     response = await call_next(request)
     
     duration_ms = (time.perf_counter() - start_time) * 1000
+    
+    # Add processing time header
+    response.headers["X-Processing-Time"] = f"{duration_ms:.2f}ms"
     
     log_request(
         logger=logger,
@@ -61,7 +103,8 @@ async def logging_middleware(request: Request, call_next):
         path=request.url.path,
         status_code=response.status_code,
         content_length=content_length,
-        duration_ms=duration_ms
+        duration_ms=duration_ms,
+        request_id=request_id
     )
     
     return response

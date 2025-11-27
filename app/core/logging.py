@@ -34,7 +34,8 @@ def log_request(
     path: str,
     status_code: int,
     content_length: int,
-    duration_ms: float
+    duration_ms: float,
+    request_id: str | None = None
 ) -> None:
     """Log request metadata safely without exposing content.
     
@@ -45,15 +46,27 @@ def log_request(
         status_code: Response status code
         content_length: Size of request body in bytes
         duration_ms: Request processing time in milliseconds
+        request_id: Unique request ID for tracking (optional)
     """
-    logger.info(
-        "request: method=%s path=%s status=%d content_length=%d duration_ms=%.2f",
-        method,
-        path,
-        status_code,
-        content_length,
-        duration_ms
-    )
+    if request_id:
+        logger.info(
+            "request: method=%s path=%s status=%d content_length=%d duration_ms=%.2f request_id=%s",
+            method,
+            path,
+            status_code,
+            content_length,
+            duration_ms,
+            request_id
+        )
+    else:
+        logger.info(
+            "request: method=%s path=%s status=%d content_length=%d duration_ms=%.2f",
+            method,
+            path,
+            status_code,
+            content_length,
+            duration_ms
+        )
 
 
 def sanitize_for_logging(data: dict[str, Any]) -> dict[str, Any]:
