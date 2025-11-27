@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Masker API - Privacy-first PII redaction for LLMs. Remove personal information from text and JSON before sending to ChatGPT, Claude, or any LLM.">
+    <meta name="keywords" content="PII redaction, privacy API, data anonymization, LLM safety, ChatGPT privacy, Claude privacy, text anonymization, JSON redaction">
+    <title>Masker API - PII Redaction for LLMs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-darker: #050508;
+            --accent-cyan: #00ffff;
+            --accent-purple: #9d4edd;
+            --accent-pink: #ff006e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #1a1a2e;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--accent-cyan) 0%, transparent 70%);
+            opacity: 0.1;
+            top: -250px;
+            right: -250px;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.1; }
+            50% { transform: scale(1.1); opacity: 0.15; }
+        }
+        
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+            position: relative;
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .hero .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+        
+        .demo-box {
+            background: var(--bg-darker);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+        
+        .demo-text {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            position: relative;
+        }
+        
+        .demo-text .original {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .demo-text .redacted {
+            color: var(--accent-cyan);
+        }
+        
+        .demo-text .pii {
+            color: var(--accent-pink);
+            font-weight: bold;
+            animation: highlight 2s ease-in-out infinite;
+        }
+        
+        @keyframes highlight {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: 2px solid var(--accent-cyan);
+            background: transparent;
+            color: var(--accent-cyan);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+        }
+        
+        .btn-primary {
+            background: var(--accent-cyan);
+            color: var(--bg-dark);
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-purple);
+            border-color: var(--accent-purple);
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 5rem 0;
+            background: var(--bg-darker);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.1);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+        }
+        
+        /* Flow Diagram */
+        .flow {
+            padding: 5rem 0;
+            text-align: center;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin: 3rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .flow-step {
+            background: var(--bg-darker);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            min-width: 200px;
+            position: relative;
+        }
+        
+        .flow-step::after {
+            content: '→';
+            position: absolute;
+            right: -2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            color: var(--accent-cyan);
+        }
+        
+        .flow-step:last-child::after {
+            display: none;
+        }
+        
+        /* Privacy Section */
+        .privacy {
+            padding: 5rem 0;
+            background: var(--bg-darker);
+            text-align: center;
+        }
+        
+        .privacy-badge {
+            display: inline-block;
+            background: var(--bg-dark);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 50px;
+            padding: 1rem 2rem;
+            margin: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-step::after {
+                content: '↓';
+                right: auto;
+                bottom: -2rem;
+                top: auto;
+                transform: translateX(-50%);
+                left: 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-content">
+            <h1>🔒 Masker API</h1>
+            <p class="subtitle">Privacy-first PII Redaction for LLMs</p>
+            
+            <div class="demo-box">
+                <div class="demo-text">
+                    <div class="original">
+                        Original: "Contact <span class="pii">John Doe</span> at <span class="pii">john@example.com</span>"
+                    </div>
+                    <div class="redacted">
+                        Redacted: "Contact <span class="pii">&lt;PERSON&gt;</span> at <span class="pii">&lt;EMAIL&gt;</span>"
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cta-buttons">
+                <a href="https://masker.kikuai.dev/docs" class="btn btn-primary">Try API</a>
+                <a href="https://github.com/KikuAI-Lab/masker/wiki" class="btn">Documentation</a>
+            </div>
+        </div>
+    </div>
+    
+    <section class="features">
+        <div class="container">
+            <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 1rem; color: var(--accent-cyan);">Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔤</div>
+                    <h3>Text & JSON</h3>
+                    <p>Process plain text or entire JSON structures recursively</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Multiple PII Types</h3>
+                    <p>Detect EMAIL, PHONE, CARD, and PERSON (names)</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Privacy First</h3>
+                    <p>Stateless, no data storage, no content logging</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Fast Processing</h3>
+                    <p>Average response time: 15-25ms</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Multi-Language</h3>
+                    <p>English & Russian NER support</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎭</div>
+                    <h3>Flexible Modes</h3>
+                    <p>Mask (***) or placeholder (&lt;TYPE&gt;) modes</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="flow">
+        <div class="container">
+            <h2 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--accent-cyan);">How It Works</h2>
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <h3>Your Data</h3>
+                    <p>Text or JSON with PII</p>
+                </div>
+                <div class="flow-step">
+                    <h3>Masker API</h3>
+                    <p>Detects & redacts PII</p>
+                </div>
+                <div class="flow-step">
+                    <h3>Clean Data</h3>
+                    <p>PII-free content</p>
+                </div>
+                <div class="flow-step">
+                    <h3>LLM</h3>
+                    <p>Safe to send to ChatGPT/Claude</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="privacy">
+        <div class="container">
+            <h2 style="font-size: 2.5rem; margin-bottom: 2rem; color: var(--accent-cyan);">Privacy Guarantee</h2>
+            <div class="privacy-badge">❌ No Database</div>
+            <div class="privacy-badge">❌ No File Storage</div>
+            <div class="privacy-badge">❌ No Content Logging</div>
+            <div class="privacy-badge">✅ Stateless Processing</div>
+            <div class="privacy-badge">✅ GDPR Compliant</div>
+            <p style="margin-top: 2rem; font-size: 1.2rem; color: var(--text-secondary);">
+                We store NOTHING. We log NOTHING. Your data is processed in-memory and immediately discarded.
+            </p>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <p>Built with ❤️ by <a href="https://kikuai.dev" style="color: var(--accent-cyan);">KikuAI Lab</a></p>
+            <p style="margin-top: 1rem;">
+                <a href="https://github.com/KikuAI-Lab/masker" style="color: var(--accent-cyan); margin: 0 1rem;">GitHub</a>
+                <a href="https://masker.kikuai.dev/docs" style="color: var(--accent-cyan); margin: 0 1rem;">API Docs</a>
+                <a href="https://github.com/KikuAI-Lab/masker/wiki" style="color: var(--accent-cyan); margin: 0 1rem;">Wiki</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
+
