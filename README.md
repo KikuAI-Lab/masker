@@ -8,7 +8,7 @@
 
 **Privacy-first API that removes personal information from text and JSON before sending to ChatGPT, Claude, or any LLM.**
 
-🔗 **[Live API](https://masker.kikuai.dev)** | 📖 **[API Docs](https://masker.kikuai.dev/docs)** | 📚 **[Wiki](https://github.com/KikuAI-Lab/masker/wiki)** | 🌐 **[Landing Page](https://kikuai-lab.github.io/masker/)**
+🔗 **[API Docs](https://masker.kikuai.dev/docs)** | 📖 **[Wiki](https://github.com/KikuAI-Lab/masker/wiki)** | 🌐 **[Landing Page](https://kikuai-lab.github.io/masker/)**
 
 ---
 
