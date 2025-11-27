@@ -21,15 +21,38 @@ router = APIRouter()
 @router.post(
     "/mask",
     response_model=Union[MaskResponse, MaskJsonResponse],
-    summary="Mask PII in text or JSON",
+    summary="🎭 Mask PII with asterisks (***)",
     description="""
-Replace detected PII entities with asterisks (***).
+**Replace detected PII entities with asterisks (`***`).**
+
+This endpoint **masks** PII by replacing it with `***`. Use this when you want:
+- Simple anonymization without type information
+- Consistent masking regardless of PII type
+- Minimal output changes (same length pattern)
 
 **Input modes:**
-- `text`: Plain text string
-- `json`: JSON object/array (masks string values recursively, preserves structure)
+- **`text`**: Plain text string (max 32KB)
+- **`json`**: JSON object/array (max 64KB total, masks string values recursively, preserves structure)
 
-Returns masked content and entity details.
+**Example Request:**
+```json
+{
+  "text": "Contact John Doe at john@example.com"
+}
+```
+
+**Example Response:**
+```json
+{
+  "text": "Contact *** at ***",
+  "entities": [
+    {"type": "PERSON", "value": "John Doe", "start": 8, "end": 16, "masked_value": "***"},
+    {"type": "EMAIL", "value": "john@example.com", "start": 20, "end": 36, "masked_value": "***"}
+  ]
+}
+```
+
+**Note:** All PII types are masked with the same pattern (`***`).
 """
 )
 async def mask_pii(request: UnifiedRequest) -> Union[MaskResponse, MaskJsonResponse]:

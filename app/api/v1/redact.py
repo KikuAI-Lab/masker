@@ -21,15 +21,38 @@ router = APIRouter()
 @router.post(
     "/redact",
     response_model=Union[MaskResponse, MaskJsonResponse],
-    summary="Redact PII in text or JSON",
+    summary="🔒 Redact PII with [REDACTED]",
     description="""
-Replace detected PII entities with [REDACTED] placeholder.
+**Replace detected PII entities with `[REDACTED]` placeholder.**
+
+This endpoint **redacts** PII by replacing it with `[REDACTED]`. Use this when you want:
+- Clear indication that content was redacted
+- Consistent redaction pattern for all PII types
+- Explicit privacy markers in your output
 
 **Input modes:**
-- `text`: Plain text string
-- `json`: JSON object/array (redacts string values recursively, preserves structure)
+- **`text`**: Plain text string (max 32KB)
+- **`json`**: JSON object/array (max 64KB total, redacts string values recursively, preserves structure)
 
-Returns redacted content and entity details.
+**Example Request:**
+```json
+{
+  "text": "Contact John Doe at john@example.com"
+}
+```
+
+**Example Response:**
+```json
+{
+  "text": "Contact [REDACTED] at [REDACTED]",
+  "entities": [
+    {"type": "PERSON", "value": "John Doe", "start": 8, "end": 16, "masked_value": "[REDACTED]"},
+    {"type": "EMAIL", "value": "john@example.com", "start": 20, "end": 36, "masked_value": "[REDACTED]"}
+  ]
+}
+```
+
+**Note:** All PII types are redacted with the same placeholder (`[REDACTED]`).
 """
 )
 async def redact_pii(request: UnifiedRequest) -> Union[MaskResponse, MaskJsonResponse]:

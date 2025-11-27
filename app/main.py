@@ -42,7 +42,25 @@ app = FastAPI(
         400: {"model": ErrorResponse, "description": "Bad Request"},
         413: {"model": ErrorResponse, "description": "Request Entity Too Large"},
         500: {"model": ErrorResponse, "description": "Internal Server Error"},
-    }
+    },
+    openapi_tags=[
+        {
+            "name": "Main API",
+            "description": "**Main endpoint for PII redaction.** Supports both text and JSON input with flexible redaction modes. Perfect for cleaning data before sending to LLMs.",
+        },
+        {
+            "name": "PII Processing",
+            "description": "**Standard endpoints for PII detection and processing.** Use these for programmatic access with specific redaction styles.",
+        },
+        {
+            "name": "Health",
+            "description": "**Service health and status endpoints.**",
+        },
+        {
+            "name": "Root",
+            "description": "**Root and redirect endpoints.**",
+        },
+    ],
 )
 
 # Request ID middleware - add unique ID to each request for tracking
@@ -159,7 +177,16 @@ async def global_exception_handler(request: Request, exc: Exception):
 @app.get(
     "/",
     tags=["Root"],
-    summary="API root endpoint"
+    summary="🏠 API root endpoint",
+    description="""
+**API root endpoint - redirects to interactive documentation.**
+
+This endpoint automatically redirects to `/docs` where you can:
+- Explore all available endpoints
+- Try API calls directly in your browser
+- View request/response schemas
+- Test the API with sample data
+"""
 )
 async def root():
     """Redirect to API documentation."""
@@ -170,10 +197,28 @@ async def root():
     "/health",
     response_model=HealthResponse,
     tags=["Health"],
-    summary="Health check endpoint"
+    summary="💚 Health check endpoint",
+    description="""
+**Check if the API service is running and healthy.**
+
+Returns the service status and version information. No authentication required.
+
+**Use cases:**
+- Monitor service availability
+- Check API version
+- Verify deployment status
+
+**Example Response:**
+```json
+{
+  "status": "ok",
+  "version": "1.0.0"
+}
+```
+"""
 )
 async def health_check() -> HealthResponse:
-    """Check if the service is running."""
+    """Check if the service is running and healthy."""
     return HealthResponse(
         status="ok",
         version=settings.api_version

@@ -7,7 +7,10 @@ from app.api.v1.redact import router as redact_router
 from app.api.v1.detect import router as detect_router
 
 
-router = APIRouter(tags=["PII Processing"])
+router = APIRouter(
+    tags=["PII Processing"],
+    prefix="/api/v1"
+)
 
 # Include all endpoint routers
 router.include_router(mask_router)

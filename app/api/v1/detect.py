@@ -22,16 +22,40 @@ router = APIRouter()
 @router.post(
     "/detect",
     response_model=Union[DetectResponse, DetectJsonResponse],
-    summary="Detect PII in text or JSON",
+    summary="🔍 Detect PII without modifying content",
     description="""
-Scan text or JSON for PII entities without modifying content.
+**Scan text or JSON for PII entities without modifying the original content.**
+
+This endpoint only **detects** PII - it doesn't modify your data. Use this when you want to:
+- Check if content contains PII before processing
+- Get a list of detected entities with their positions
+- Analyze PII distribution in your data
 
 **Input modes:**
-- `text`: Plain text string
-- `json`: JSON object/array (processes string values recursively)
+- **`text`**: Plain text string (max 32KB)
+- **`json`**: JSON object/array (max 64KB total, processes string values recursively)
 
-Returns detected entities with their types, values, and positions.
-For JSON mode, includes the JSON path to each field.
+**Returns:**
+- List of detected entities with types, values, and positions
+- For JSON mode: includes JSON path to each field (e.g., `"user.email"`)
+
+**Example Request (Text):**
+```json
+{
+  "text": "Contact John Doe at john@example.com or call 555-123-4567"
+}
+```
+
+**Example Response:**
+```json
+{
+  "entities": [
+    {"type": "PERSON", "value": "John Doe", "start": 8, "end": 16},
+    {"type": "EMAIL", "value": "john@example.com", "start": 20, "end": 36},
+    {"type": "PHONE", "value": "555-123-4567", "start": 45, "end": 57}
+  ]
+}
+```
 """
 )
 async def detect_pii(request: UnifiedRequest) -> Union[DetectResponse, DetectJsonResponse]:
