@@ -35,7 +35,48 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.api_title,
-    description=settings.api_description,
+    description="""
+    **Masker API** - Privacy-first PII Redaction & Text Anonymization for LLMs.
+    
+    Remove personal information from text and JSON before sending to ChatGPT, Claude, or any LLM.
+    
+    ## 🔒 Privacy First
+    - **No data storage** - All processing is in-memory
+    - **No content logging** - Only metadata is logged
+    - **Stateless** - Each request is independent
+    
+    ## 🚀 Quick Start
+    
+    **Text Mode:**
+    ```json
+    POST /v1/redact
+    {
+      "text": "Contact John Doe at john@example.com",
+      "mode": "placeholder"
+    }
+    ```
+    
+    **JSON Mode:**
+    ```json
+    POST /v1/redact
+    {
+      "json": {"user": {"name": "John Doe", "email": "john@example.com"}},
+      "mode": "placeholder"
+    }
+    ```
+    
+    ## 📚 Endpoints
+    
+    - **`POST /v1/redact`** - Main endpoint for PII redaction (supports text & JSON)
+    - **`POST /api/v1/detect`** - Detect PII without modifying content
+    - **`POST /api/v1/mask`** - Mask PII with `***`
+    - **`POST /api/v1/redact`** - Redact PII with `[REDACTED]`
+    - **`GET /health`** - Health check
+    
+    ## 📖 Full Documentation
+    
+    See [Wiki](https://github.com/KikuAI-Lab/masker/wiki) for complete documentation.
+    """,
     version=settings.api_version,
     lifespan=lifespan,
     responses={
@@ -43,22 +84,30 @@ app = FastAPI(
         413: {"model": ErrorResponse, "description": "Request Entity Too Large"},
         500: {"model": ErrorResponse, "description": "Internal Server Error"},
     },
-    openapi_tags=[
+    tags_metadata=[
         {
             "name": "Main API",
-            "description": "**Main endpoint for PII redaction.** Supports both text and JSON input with flexible redaction modes. Perfect for cleaning data before sending to LLMs.",
+            "description": "**Main endpoint for PII redaction.** Supports both text and JSON input modes. Perfect for cleaning data before sending to LLMs.",
         },
         {
-            "name": "PII Processing",
-            "description": "**Standard endpoints for PII detection and processing.** Use these for programmatic access with specific redaction styles.",
+            "name": "PII Detection",
+            "description": "**Detect PII entities** without modifying the content. Returns list of detected entities with their types and positions.",
+        },
+        {
+            "name": "PII Masking",
+            "description": "**Mask PII entities** by replacing them with asterisks (`***`). Preserves structure in JSON mode.",
+        },
+        {
+            "name": "PII Redaction",
+            "description": "**Redact PII entities** by replacing them with `[REDACTED]`. Preserves structure in JSON mode.",
         },
         {
             "name": "Health",
-            "description": "**Service health and status endpoints.**",
+            "description": "**Health check endpoint.** No authentication required. Returns service status and version.",
         },
         {
             "name": "Root",
-            "description": "**Root and redirect endpoints.**",
+            "description": "API root endpoint. Redirects to documentation.",
         },
     ],
 )
@@ -178,15 +227,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     "/",
     tags=["Root"],
     summary="🏠 API root endpoint",
-    description="""
-**API root endpoint - redirects to interactive documentation.**
-
-This endpoint automatically redirects to `/docs` where you can:
-- Explore all available endpoints
-- Try API calls directly in your browser
-- View request/response schemas
-- Test the API with sample data
-"""
+    description="Redirects to interactive API documentation at `/docs`."
 )
 async def root():
     """Redirect to API documentation."""
@@ -199,16 +240,11 @@ async def root():
     tags=["Health"],
     summary="💚 Health check endpoint",
     description="""
-**Check if the API service is running and healthy.**
+**Check if the service is running and healthy.**
 
-Returns the service status and version information. No authentication required.
+No authentication required. Returns service status and version.
 
-**Use cases:**
-- Monitor service availability
-- Check API version
-- Verify deployment status
-
-**Example Response:**
+**Response:**
 ```json
 {
   "status": "ok",
@@ -218,7 +254,7 @@ Returns the service status and version information. No authentication required.
 """
 )
 async def health_check() -> HealthResponse:
-    """Check if the service is running and healthy."""
+    """Check if the service is running."""
     return HealthResponse(
         status="ok",
         version=settings.api_version

@@ -22,93 +22,23 @@ router = APIRouter(prefix="/v1", tags=["Main API"])
 @router.post(
     "/redact",
     response_model=RapidAPIRedactResponse,
-    summary="🔒 Main endpoint: Redact PII in text or JSON",
+    summary="🔒 Redact PII in text or JSON",
     description="""
-**Main endpoint for PII redaction with flexible modes and entity filtering.**
+**Main endpoint for PII redaction.** Perfect for cleaning data before sending to LLMs like ChatGPT, Claude, etc.
 
-**Perfect for cleaning data before sending to LLMs like ChatGPT, Claude, Gemini, etc.**
+## Input Modes
 
-This is the **recommended endpoint** for most use cases. It provides:
-- ✅ Flexible input (text or JSON)
-- ✅ Multiple redaction modes (mask or placeholder)
-- ✅ Entity type filtering
-- ✅ Confidence scores for each detection
-- ✅ Processing time measurement
-
-**Input Modes:**
-
-1. **Text Mode** - Process plain text strings
-   ```json
-   {
-     "text": "Contact John Doe at john@example.com",
-     "mode": "placeholder"
-   }
-   ```
-
-2. **JSON Mode** - Process entire JSON structures recursively
-   ```json
-   {
-     "json": {
-       "user": {
-         "name": "John Doe",
-         "email": "john@example.com"
-       }
-     },
-     "mode": "placeholder"
-   }
-   ```
-
-**Redaction Modes:**
-
-- **`mask`** (default) - Replace PII with `***`
-  - Example: `"Contact *** at ***"`
-  
-- **`placeholder`** - Replace PII with type placeholders
-  - Example: `"Contact <PERSON> at <EMAIL>"`
-  - Placeholders: `<PERSON>`, `<EMAIL>`, `<PHONE>`, `<CARD>`
-
-**Entity Filtering:**
-
-- If `entities` is **not provided**: All PII types are redacted
-- If `entities` is **provided**: Only specified types are redacted
-  ```json
-  {
-    "text": "John Doe's email is john@example.com",
-    "mode": "placeholder",
-    "entities": ["EMAIL"]
-  }
-  ```
-  Result: `"John Doe's email is <EMAIL>"` (PERSON not redacted)
-
-**Supported Entity Types:**
-- `PERSON` - Person names (detected via NER, ~85% accuracy)
-- `EMAIL` - Email addresses (100% accuracy)
-- `PHONE` - Phone numbers (100% accuracy, international formats)
-- `CARD` - Credit card numbers (100% accuracy, Luhn validation)
-
-**Example Request (Text Mode):**
+### Text Mode
+Process plain text strings:
 ```json
 {
-  "text": "Contact John Doe at john@example.com or call 555-123-4567",
+  "text": "Contact John Doe at john@example.com",
   "mode": "placeholder"
 }
 ```
 
-**Example Response:**
-```json
-{
-  "redacted_text": "Contact <PERSON> at <EMAIL> or call <PHONE>",
-  "redacted_json": null,
-  "items": [
-    {"entity_type": "PERSON", "start": 8, "end": 16, "score": 0.85},
-    {"entity_type": "EMAIL", "start": 20, "end": 36, "score": 1.0},
-    {"entity_type": "PHONE", "start": 45, "end": 57, "score": 1.0}
-  ],
-  "processing_time_ms": 15.29
-}
-```
-
-**Example Request (JSON Mode):**
+### JSON Mode
+Process entire JSON structures recursively (only string values are modified):
 ```json
 {
   "json": {
@@ -122,30 +52,53 @@ This is the **recommended endpoint** for most use cases. It provides:
 }
 ```
 
-**Example Response:**
+## Redaction Modes
+
+- **`mask`** (default): Replace PII with `***`
+- **`placeholder`**: Replace PII with type placeholders:
+  - `<PERSON>` for person names
+  - `<EMAIL>` for email addresses
+  - `<PHONE>` for phone numbers
+  - `<CARD>` for credit card numbers
+
+## Entity Filtering
+
+Filter which PII types to redact:
 ```json
 {
-  "redacted_text": null,
-  "redacted_json": {
-    "user": {
-      "name": "<PERSON>",
-      "email": "<EMAIL>",
-      "age": 30
-    }
-  },
-  "items": [
-    {"entity_type": "PERSON", "path": "user.name", "start": 0, "end": 8, "score": 0.85},
-    {"entity_type": "EMAIL", "path": "user.email", "start": 0, "end": 16, "score": 1.0}
-  ],
-  "processing_time_ms": 23.46
+  "text": "John Doe's email is john@example.com",
+  "mode": "placeholder",
+  "entities": ["EMAIL"]  // Only redact emails
 }
 ```
 
-**Use Cases:**
-- Clean user messages before sending to ChatGPT/Claude
-- Anonymize support tickets for AI analysis
-- Process form data before LLM classification
-- Sanitize logs for AI-powered monitoring
+**Supported entity types:** `PERSON`, `EMAIL`, `PHONE`, `CARD`
+
+## Example Response
+
+```json
+{
+  "redacted_text": "Contact <PERSON> at <EMAIL>",
+  "redacted_json": null,
+  "items": [
+    {
+      "entity_type": "PERSON",
+      "path": null,
+      "start": 8,
+      "end": 16,
+      "score": 0.85
+    },
+    {
+      "entity_type": "EMAIL",
+      "path": null,
+      "start": 20,
+      "end": 36,
+      "score": 1.0
+    }
+  ],
+  "processing_time_ms": 15.29
+}
+```
 """
 )
 async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactResponse:

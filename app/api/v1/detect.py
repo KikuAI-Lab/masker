@@ -16,7 +16,7 @@ from app.services.pii_detector import get_detector
 from app.services.json_processor import detect_json
 
 
-router = APIRouter()
+router = APIRouter(tags=["PII Detection"])
 
 
 @router.post(
@@ -24,38 +24,60 @@ router = APIRouter()
     response_model=Union[DetectResponse, DetectJsonResponse],
     summary="🔍 Detect PII without modifying content",
     description="""
-**Scan text or JSON for PII entities without modifying the original content.**
+**Scan text or JSON for PII entities without modifying the content.**
 
-This endpoint only **detects** PII - it doesn't modify your data. Use this when you want to:
-- Check if content contains PII before processing
-- Get a list of detected entities with their positions
-- Analyze PII distribution in your data
+Use this endpoint when you only need to identify PII without redacting it.
 
-**Input modes:**
-- **`text`**: Plain text string (max 32KB)
-- **`json`**: JSON object/array (max 64KB total, processes string values recursively)
+## Input Modes
 
-**Returns:**
-- List of detected entities with types, values, and positions
-- For JSON mode: includes JSON path to each field (e.g., `"user.email"`)
-
-**Example Request (Text):**
+### Text Mode
 ```json
 {
-  "text": "Contact John Doe at john@example.com or call 555-123-4567"
+  "text": "Contact John Doe at john@example.com"
 }
 ```
 
-**Example Response:**
+### JSON Mode
+```json
+{
+  "json": {
+    "user": {
+      "name": "John Doe",
+      "email": "john@example.com"
+    }
+  }
+}
+```
+
+## Detected Entity Types
+
+- **EMAIL**: Email addresses (regex, 100% accuracy)
+- **PHONE**: Phone numbers (international formats, 100% accuracy)
+- **CARD**: Credit card numbers (regex + Luhn validation, 100% accuracy)
+- **PERSON**: Person names (spaCy NER, ~85% accuracy)
+
+## Example Response
+
 ```json
 {
   "entities": [
-    {"type": "PERSON", "value": "John Doe", "start": 8, "end": 16},
-    {"type": "EMAIL", "value": "john@example.com", "start": 20, "end": 36},
-    {"type": "PHONE", "value": "555-123-4567", "start": 45, "end": 57}
+    {
+      "type": "PERSON",
+      "value": "John Doe",
+      "start": 8,
+      "end": 16
+    },
+    {
+      "type": "EMAIL",
+      "value": "john@example.com",
+      "start": 20,
+      "end": 36
+    }
   ]
 }
 ```
+
+For JSON mode, each entity includes a `path` field showing its location (e.g., `"user.name"`).
 """
 )
 async def detect_pii(request: UnifiedRequest) -> Union[DetectResponse, DetectJsonResponse]:

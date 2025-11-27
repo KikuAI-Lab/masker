@@ -15,7 +15,7 @@ from app.services.masking import redact_text
 from app.services.json_processor import redact_json
 
 
-router = APIRouter()
+router = APIRouter(tags=["PII Redaction"])
 
 
 @router.post(
@@ -25,34 +25,68 @@ router = APIRouter()
     description="""
 **Replace detected PII entities with `[REDACTED]` placeholder.**
 
-This endpoint **redacts** PII by replacing it with `[REDACTED]`. Use this when you want:
-- Clear indication that content was redacted
-- Consistent redaction pattern for all PII types
-- Explicit privacy markers in your output
+This endpoint redacts all detected PII by replacing it with `[REDACTED]`.
 
-**Input modes:**
-- **`text`**: Plain text string (max 32KB)
-- **`json`**: JSON object/array (max 64KB total, redacts string values recursively, preserves structure)
+## Input Modes
 
-**Example Request:**
+### Text Mode
 ```json
 {
   "text": "Contact John Doe at john@example.com"
 }
 ```
 
-**Example Response:**
+**Result:** `"Contact [REDACTED] at [REDACTED]"`
+
+### JSON Mode
+```json
+{
+  "json": {
+    "user": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "age": 30
+    }
+  }
+}
+```
+
+**Result:**
+```json
+{
+  "user": {
+    "name": "[REDACTED]",
+    "email": "[REDACTED]",
+    "age": 30
+  }
+}
+```
+
+## Example Response
+
 ```json
 {
   "text": "Contact [REDACTED] at [REDACTED]",
   "entities": [
-    {"type": "PERSON", "value": "John Doe", "start": 8, "end": 16, "masked_value": "[REDACTED]"},
-    {"type": "EMAIL", "value": "john@example.com", "start": 20, "end": 36, "masked_value": "[REDACTED]"}
+    {
+      "type": "PERSON",
+      "value": "John Doe",
+      "start": 8,
+      "end": 16,
+      "masked_value": "[REDACTED]"
+    },
+    {
+      "type": "EMAIL",
+      "value": "john@example.com",
+      "start": 20,
+      "end": 36,
+      "masked_value": "[REDACTED]"
+    }
   ]
 }
 ```
 
-**Note:** All PII types are redacted with the same placeholder (`[REDACTED]`).
+**Note:** JSON structure is preserved. Only string values are modified.
 """
 )
 async def redact_pii(request: UnifiedRequest) -> Union[MaskResponse, MaskJsonResponse]:

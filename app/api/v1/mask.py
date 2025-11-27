@@ -15,7 +15,7 @@ from app.services.masking import mask_text
 from app.services.json_processor import mask_json
 
 
-router = APIRouter()
+router = APIRouter(tags=["PII Masking"])
 
 
 @router.post(
@@ -25,34 +25,68 @@ router = APIRouter()
     description="""
 **Replace detected PII entities with asterisks (`***`).**
 
-This endpoint **masks** PII by replacing it with `***`. Use this when you want:
-- Simple anonymization without type information
-- Consistent masking regardless of PII type
-- Minimal output changes (same length pattern)
+This endpoint masks all detected PII by replacing it with `***`, regardless of the original length.
 
-**Input modes:**
-- **`text`**: Plain text string (max 32KB)
-- **`json`**: JSON object/array (max 64KB total, masks string values recursively, preserves structure)
+## Input Modes
 
-**Example Request:**
+### Text Mode
 ```json
 {
   "text": "Contact John Doe at john@example.com"
 }
 ```
 
-**Example Response:**
+**Result:** `"Contact *** at ***"`
+
+### JSON Mode
+```json
+{
+  "json": {
+    "user": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "age": 30
+    }
+  }
+}
+```
+
+**Result:**
+```json
+{
+  "user": {
+    "name": "***",
+    "email": "***",
+    "age": 30
+  }
+}
+```
+
+## Example Response
+
 ```json
 {
   "text": "Contact *** at ***",
   "entities": [
-    {"type": "PERSON", "value": "John Doe", "start": 8, "end": 16, "masked_value": "***"},
-    {"type": "EMAIL", "value": "john@example.com", "start": 20, "end": 36, "masked_value": "***"}
+    {
+      "type": "PERSON",
+      "value": "John Doe",
+      "start": 8,
+      "end": 16,
+      "masked_value": "***"
+    },
+    {
+      "type": "EMAIL",
+      "value": "john@example.com",
+      "start": 20,
+      "end": 36,
+      "masked_value": "***"
+    }
   ]
 }
 ```
 
-**Note:** All PII types are masked with the same pattern (`***`).
+**Note:** JSON structure is preserved. Only string values are modified.
 """
 )
 async def mask_pii(request: UnifiedRequest) -> Union[MaskResponse, MaskJsonResponse]:
