@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from starlette import status
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from app.api.v1.router import router as v1_router
 from app.api.rapidapi.redact import router as rapidapi_router
@@ -111,6 +111,16 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "Internal server error"}
     )
+
+
+@app.get(
+    "/",
+    tags=["Root"],
+    summary="API root endpoint"
+)
+async def root():
+    """Redirect to API documentation."""
+    return RedirectResponse(url="/docs")
 
 
 @app.get(
