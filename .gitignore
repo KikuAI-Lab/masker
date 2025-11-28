@@ -75,3 +75,14 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# Temporary reports
+*_REPORT.md
+*_COMPLETION_REPORT.md
+*_SETUP_REPORT.md
+*_READINESS_REPORT.md
+*_PLAN.md
+*_ACHIEVED.md
+*_QUICK_SETUP.md
+PLAN_COMPLIANCE_REPORT.md
+PRODUCTION_READINESS_REPORT.md
+
