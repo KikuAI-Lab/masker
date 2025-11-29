@@ -58,6 +58,10 @@ class UnifiedRequest(BaseModel):
         default="en",
         description="Language of the content (en or ru)"
     )
+    entities: Optional[list[EntityType]] = Field(
+        default=None,
+        description="Filter to detect only specific entity types (e.g., ['EMAIL', 'PHONE'])"
+    )
     
     @model_validator(mode="after")
     def validate_input_mode(self) -> "UnifiedRequest":
@@ -276,6 +280,11 @@ class HealthResponse(BaseModel):
     
     status: str = Field(default="ok", description="Service status")
     version: str = Field(..., description="API version")
+    uptime_seconds: float = Field(..., description="Service uptime in seconds")
+    components: dict[str, str] = Field(
+        default_factory=dict,
+        description="Status of individual components (e.g., 'pii_detector': 'ready')"
+    )
 
 
 class ErrorResponse(BaseModel):

@@ -103,7 +103,7 @@ async def redact_pii(request: UnifiedRequest) -> Union[MaskResponse, MaskJsonRes
     """
     if request.is_json_mode:
         # JSON mode - redact in all string values
-        redacted_data, entities = redact_json(request.json, request.language)
+        redacted_data, entities = redact_json(request.json, request.language, request.entities)
         
         json_entities = [
             JsonFieldEntity(
@@ -120,7 +120,7 @@ async def redact_pii(request: UnifiedRequest) -> Union[MaskResponse, MaskJsonRes
     else:
         # Text mode - standard redaction
         detector = get_detector()
-        detected = detector.detect(request.text, request.language)
+        detected = detector.detect(request.text, request.language, request.entities)
         
         redacted_text, redacted_entities = redact_text(request.text, detected)
         

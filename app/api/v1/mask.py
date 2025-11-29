@@ -103,7 +103,7 @@ async def mask_pii(request: UnifiedRequest) -> Union[MaskResponse, MaskJsonRespo
     """
     if request.is_json_mode:
         # JSON mode - mask in all string values
-        masked_data, entities = mask_json(request.json, request.language)
+        masked_data, entities = mask_json(request.json, request.language, request.entities)
         
         json_entities = [
             JsonFieldEntity(
@@ -120,7 +120,7 @@ async def mask_pii(request: UnifiedRequest) -> Union[MaskResponse, MaskJsonRespo
     else:
         # Text mode - standard masking
         detector = get_detector()
-        detected = detector.detect(request.text, request.language)
+        detected = detector.detect(request.text, request.language, request.entities)
         
         masked_text, masked_entities = mask_text(request.text, detected)
         

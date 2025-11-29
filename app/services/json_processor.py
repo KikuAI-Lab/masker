@@ -103,13 +103,15 @@ def process_json_recursive(
 
 def detect_json(
     data: Any,
-    language: str = "en"
+    language: str = "en",
+    entity_types: Optional[list[str]] = None
 ) -> tuple[Any, list[JsonFieldEntity]]:
     """Detect PII in JSON structure without modifying it.
     
     Args:
         data: JSON data to scan
         language: Language for NER
+        entity_types: Optional list of entity types to detect
         
     Returns:
         Tuple of (original_data, list of detected entities with paths)
@@ -117,7 +119,7 @@ def detect_json(
     detector = get_detector()
     
     def detect_processor(text: str) -> tuple[str, list]:
-        entities = detector.detect(text, language)
+        entities = detector.detect(text, language, entity_types)
         return text, entities  # Return original text unchanged
     
     _, entities = process_json_recursive(data, detect_processor)
@@ -126,13 +128,15 @@ def detect_json(
 
 def mask_json(
     data: Any,
-    language: str = "en"
+    language: str = "en",
+    entity_types: Optional[list[str]] = None
 ) -> tuple[Any, list[JsonFieldEntity]]:
     """Mask PII in JSON structure with ***.
     
     Args:
         data: JSON data to process
         language: Language for NER
+        entity_types: Optional list of entity types to mask
         
     Returns:
         Tuple of (masked_data, list of detected entities with paths)
@@ -140,7 +144,7 @@ def mask_json(
     detector = get_detector()
     
     def mask_processor(text: str) -> tuple[str, list]:
-        entities = detector.detect(text, language)
+        entities = detector.detect(text, language, entity_types)
         masked_text, masked_entities = mask_text(text, entities)
         return masked_text, entities  # Return original entities for reporting
     
@@ -149,13 +153,15 @@ def mask_json(
 
 def redact_json(
     data: Any,
-    language: str = "en"
+    language: str = "en",
+    entity_types: Optional[list[str]] = None
 ) -> tuple[Any, list[JsonFieldEntity]]:
     """Redact PII in JSON structure with [REDACTED].
     
     Args:
         data: JSON data to process
         language: Language for NER
+        entity_types: Optional list of entity types to redact
         
     Returns:
         Tuple of (redacted_data, list of detected entities with paths)
@@ -163,7 +169,7 @@ def redact_json(
     detector = get_detector()
     
     def redact_processor(text: str) -> tuple[str, list]:
-        entities = detector.detect(text, language)
+        entities = detector.detect(text, language, entity_types)
         redacted_text, _ = redact_text(text, entities)
         return redacted_text, entities
     

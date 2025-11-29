@@ -22,9 +22,16 @@ from app.models.schemas import HealthResponse, ErrorResponse
 from app.services.pii_detector import get_detector
 
 
+# Global start time
+APP_START_TIME = time.time()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan handler - load models on startup."""
+    global APP_START_TIME
+    APP_START_TIME = time.time()
+    
     logger.info("Starting Masker API...")
     # Pre-load the PII detector to warm up spaCy models
     get_detector()
@@ -134,6 +141,11 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(RequestIDMiddleware)
 
+# Rate limiting middleware - protect API from abuse
+# Important for RapidAPI: 60 req/min per IP, 1000 req/min global
+from app.middleware.rate_limit import RateLimitMiddleware
+app.add_middleware(RateLimitMiddleware)
+
 # CORS middleware - allow cross-origin requests
 # This is important for browser-based clients and RapidAPI integration
 app.add_middleware(
@@ -142,8 +154,9 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["X-Request-ID", "X-Processing-Time"],
+    expose_headers=["X-Request-ID", "X-Processing-Time", "X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"],
 )
+
 
 
 @app.middleware("http")
@@ -255,9 +268,23 @@ No authentication required. Returns service status and version.
 )
 async def health_check() -> HealthResponse:
     """Check if the service is running."""
+    uptime = time.time() - APP_START_TIME
+    
+    # Check if detector is loaded
+    detector_status = "ready"
+    try:
+        get_detector()
+    except Exception:
+        detector_status = "error"
+        
     return HealthResponse(
         status="ok",
-        version=settings.api_version
+        version=settings.api_version,
+        uptime_seconds=round(uptime, 2),
+        components={
+            "pii_detector": detector_status,
+            "rate_limiter": "active"
+        }
     )
 
 

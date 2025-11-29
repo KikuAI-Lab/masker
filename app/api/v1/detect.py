@@ -94,7 +94,7 @@ async def detect_pii(request: UnifiedRequest) -> Union[DetectResponse, DetectJso
     """
     if request.is_json_mode:
         # JSON mode - detect in all string values
-        _, entities = detect_json(request.json, request.language)
+        _, entities = detect_json(request.json, request.language, request.entities)
         
         json_entities = [
             JsonFieldEntity(
@@ -111,7 +111,7 @@ async def detect_pii(request: UnifiedRequest) -> Union[DetectResponse, DetectJso
     else:
         # Text mode - standard detection
         detector = get_detector()
-        detected = detector.detect(request.text, request.language)
+        detected = detector.detect(request.text, request.language, request.entities)
         
         entities = [
             DetectedEntity(

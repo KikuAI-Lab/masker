@@ -195,12 +195,14 @@ class PIIDetector:
         
         return result
     
-    def detect(self, text: str, language: str = "en") -> list[DetectedEntity]:
+    def detect(self, text: str, language: str = "en", entity_types: Optional[list[str]] = None) -> list[DetectedEntity]:
         """Detect all PII entities in the text.
         
         Args:
             text: Input text to scan for PII
             language: Language code for NER (default: "en")
+            entity_types: Optional list of entity types to detect (e.g., ["EMAIL", "PHONE"])
+                         If None, all types are detected
             
         Returns:
             List of detected PII entities, sorted by position
@@ -214,6 +216,10 @@ class PIIDetector:
         # Combine and remove overlaps
         all_entities = regex_entities + ner_entities
         unique_entities = self._remove_overlaps(all_entities)
+        
+        # Filter by entity types if specified
+        if entity_types is not None:
+            unique_entities = [e for e in unique_entities if e.type in entity_types]
         
         # Sort by start position
         return sorted(unique_entities, key=lambda e: e.start)
