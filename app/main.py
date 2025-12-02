@@ -141,6 +141,10 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(RequestIDMiddleware)
 
+# Metrics middleware
+from app.middleware.metrics import MetricsMiddleware
+app.add_middleware(MetricsMiddleware)
+
 # Rate limiting middleware - protect API from abuse
 # Important for RapidAPI: 60 req/min per IP, 1000 req/min global
 from app.middleware.rate_limit import RateLimitMiddleware
@@ -285,6 +289,24 @@ async def health_check() -> HealthResponse:
             "pii_detector": detector_status,
             "rate_limiter": "active"
         }
+    )
+
+
+@app.get(
+    "/metrics",
+    tags=["Monitoring"],
+    summary="📊 Prometheus metrics",
+    description="Prometheus-compatible metrics endpoint for monitoring and observability.",
+    include_in_schema=False  # Hide from main API docs
+)
+async def metrics():
+    """Export Prometheus metrics."""
+    from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+    from starlette.responses import Response
+    
+    return Response(
+        content=generate_latest(),
+        media_type=CONTENT_TYPE_LATEST
     )
 
 

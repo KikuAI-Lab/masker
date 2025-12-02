@@ -11,6 +11,8 @@ from typing import Optional
 import spacy
 from spacy.language import Language
 
+from app.core.metrics import PII_DETECTED_TOTAL
+
 
 @dataclass
 class DetectedEntity:
@@ -220,6 +222,10 @@ class PIIDetector:
         # Filter by entity types if specified
         if entity_types is not None:
             unique_entities = [e for e in unique_entities if e.type in entity_types]
+        
+        # Collect metrics
+        for entity in unique_entities:
+            PII_DETECTED_TOTAL.labels(entity_type=entity.type).inc()
         
         # Sort by start position
         return sorted(unique_entities, key=lambda e: e.start)
