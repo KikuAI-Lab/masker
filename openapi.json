@@ -1,0 +1,1096 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Masker API",
+    "description": "\n    **Masker API** - Privacy-first PII Redaction & Text Anonymization for LLMs.\n    \n    Remove personal information from text and JSON before sending to ChatGPT, Claude, or any LLM.\n    \n    ## \ud83d\udd12 Privacy First\n    - **No data storage** - All processing is in-memory\n    - **No content logging** - Only metadata is logged\n    - **Stateless** - Each request is independent\n    \n    ## \ud83d\ude80 Quick Start\n    \n    **Text Mode:**\n    ```json\n    POST /v1/redact\n    {\n      \"text\": \"Contact John Doe at john@example.com\",\n      \"mode\": \"placeholder\"\n    }\n    ```\n    \n    **JSON Mode:**\n    ```json\n    POST /v1/redact\n    {\n      \"json\": {\"user\": {\"name\": \"John Doe\", \"email\": \"john@example.com\"}},\n      \"mode\": \"placeholder\"\n    }\n    ```\n    \n    ## \ud83d\udcda Endpoints\n    \n    - **`POST /v1/redact`** - Main endpoint for PII redaction (supports text & JSON)\n    - **`POST /api/v1/detect`** - Detect PII without modifying content\n    - **`POST /api/v1/mask`** - Mask PII with `***`\n    - **`POST /api/v1/redact`** - Redact PII with `[REDACTED]`\n    - **`GET /health`** - Health check\n    \n    ## \ud83d\udcd6 Full Documentation\n    \n    See [Wiki](https://github.com/KikuAI-Lab/masker/wiki) for complete documentation.\n    ",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "\ud83c\udfe0 API root endpoint",
+        "description": "Redirects to interactive API documentation at `/docs`.",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "\ud83d\udc9a Health check endpoint",
+        "description": "**Check if the service is running and healthy.**\n\nNo authentication required. Returns service status and version.\n\n**Response:**\n```json\n{\n  \"status\": \"ok\",\n  \"version\": \"1.0.0\"\n}\n```",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/mask": {
+      "post": {
+        "tags": [
+          "PII Processing",
+          "PII Masking"
+        ],
+        "summary": "\ud83c\udfad Mask PII with asterisks (***)",
+        "description": "**Replace detected PII entities with asterisks (`***`).**\n\nThis endpoint masks all detected PII by replacing it with `***`, regardless of the original length.\n\n## Input Modes\n\n### Text Mode\n```json\n{\n  \"text\": \"Contact John Doe at john@example.com\"\n}\n```\n\n**Result:** `\"Contact *** at ***\"`\n\n### JSON Mode\n```json\n{\n  \"json\": {\n    \"user\": {\n      \"name\": \"John Doe\",\n      \"email\": \"john@example.com\",\n      \"age\": 30\n    }\n  }\n}\n```\n\n**Result:**\n```json\n{\n  \"user\": {\n    \"name\": \"***\",\n    \"email\": \"***\",\n    \"age\": 30\n  }\n}\n```\n\n## Example Response\n\n```json\n{\n  \"text\": \"Contact *** at ***\",\n  \"entities\": [\n    {\n      \"type\": \"PERSON\",\n      \"value\": \"John Doe\",\n      \"start\": 8,\n      \"end\": 16,\n      \"masked_value\": \"***\"\n    },\n    {\n      \"type\": \"EMAIL\",\n      \"value\": \"john@example.com\",\n      \"start\": 20,\n      \"end\": 36,\n      \"masked_value\": \"***\"\n    }\n  ]\n}\n```\n\n**Note:** JSON structure is preserved. Only string values are modified.",
+        "operationId": "mask_pii_api_v1_mask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnifiedRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/MaskResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MaskJsonResponse"
+                    }
+                  ],
+                  "title": "Response Mask Pii Api V1 Mask Post"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/redact": {
+      "post": {
+        "tags": [
+          "PII Processing",
+          "PII Redaction"
+        ],
+        "summary": "\ud83d\udd12 Redact PII with [REDACTED]",
+        "description": "**Replace detected PII entities with `[REDACTED]` placeholder.**\n\nThis endpoint redacts all detected PII by replacing it with `[REDACTED]`.\n\n## Input Modes\n\n### Text Mode\n```json\n{\n  \"text\": \"Contact John Doe at john@example.com\"\n}\n```\n\n**Result:** `\"Contact [REDACTED] at [REDACTED]\"`\n\n### JSON Mode\n```json\n{\n  \"json\": {\n    \"user\": {\n      \"name\": \"John Doe\",\n      \"email\": \"john@example.com\",\n      \"age\": 30\n    }\n  }\n}\n```\n\n**Result:**\n```json\n{\n  \"user\": {\n    \"name\": \"[REDACTED]\",\n    \"email\": \"[REDACTED]\",\n    \"age\": 30\n  }\n}\n```\n\n## Example Response\n\n```json\n{\n  \"text\": \"Contact [REDACTED] at [REDACTED]\",\n  \"entities\": [\n    {\n      \"type\": \"PERSON\",\n      \"value\": \"John Doe\",\n      \"start\": 8,\n      \"end\": 16,\n      \"masked_value\": \"[REDACTED]\"\n    },\n    {\n      \"type\": \"EMAIL\",\n      \"value\": \"john@example.com\",\n      \"start\": 20,\n      \"end\": 36,\n      \"masked_value\": \"[REDACTED]\"\n    }\n  ]\n}\n```\n\n**Note:** JSON structure is preserved. Only string values are modified.",
+        "operationId": "redact_pii_api_v1_redact_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnifiedRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/MaskResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MaskJsonResponse"
+                    }
+                  ],
+                  "title": "Response Redact Pii Api V1 Redact Post"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/detect": {
+      "post": {
+        "tags": [
+          "PII Processing",
+          "PII Detection"
+        ],
+        "summary": "\ud83d\udd0d Detect PII without modifying content",
+        "description": "**Scan text or JSON for PII entities without modifying the content.**\n\nUse this endpoint when you only need to identify PII without redacting it.\n\n## Input Modes\n\n### Text Mode\n```json\n{\n  \"text\": \"Contact John Doe at john@example.com\"\n}\n```\n\n### JSON Mode\n```json\n{\n  \"json\": {\n    \"user\": {\n      \"name\": \"John Doe\",\n      \"email\": \"john@example.com\"\n    }\n  }\n}\n```\n\n## Detected Entity Types\n\n- **EMAIL**: Email addresses (regex, 100% accuracy)\n- **PHONE**: Phone numbers (international formats, 100% accuracy)\n- **CARD**: Credit card numbers (regex + Luhn validation, 100% accuracy)\n- **PERSON**: Person names (spaCy NER, ~85% accuracy)\n\n## Example Response\n\n```json\n{\n  \"entities\": [\n    {\n      \"type\": \"PERSON\",\n      \"value\": \"John Doe\",\n      \"start\": 8,\n      \"end\": 16\n    },\n    {\n      \"type\": \"EMAIL\",\n      \"value\": \"john@example.com\",\n      \"start\": 20,\n      \"end\": 36\n    }\n  ]\n}\n```\n\nFor JSON mode, each entity includes a `path` field showing its location (e.g., `\"user.name\"`).",
+        "operationId": "detect_pii_api_v1_detect_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnifiedRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/DetectResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DetectJsonResponse"
+                    }
+                  ],
+                  "title": "Response Detect Pii Api V1 Detect Post"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/redact": {
+      "post": {
+        "tags": [
+          "Main API"
+        ],
+        "summary": "\ud83d\udd12 Redact PII in text or JSON",
+        "description": "**Main endpoint for PII redaction.** Perfect for cleaning data before sending to LLMs like ChatGPT, Claude, etc.\n\n## Input Modes\n\n### Text Mode\nProcess plain text strings:\n```json\n{\n  \"text\": \"Contact John Doe at john@example.com\",\n  \"mode\": \"placeholder\"\n}\n```\n\n### JSON Mode\nProcess entire JSON structures recursively (only string values are modified):\n```json\n{\n  \"json\": {\n    \"user\": {\n      \"name\": \"John Doe\",\n      \"email\": \"john@example.com\",\n      \"age\": 30\n    }\n  },\n  \"mode\": \"placeholder\"\n}\n```\n\n## Redaction Modes\n\n- **`mask`** (default): Replace PII with `***`\n- **`placeholder`**: Replace PII with type placeholders:\n  - `<PERSON>` for person names\n  - `<EMAIL>` for email addresses\n  - `<PHONE>` for phone numbers\n  - `<CARD>` for credit card numbers\n\n## Entity Filtering\n\nFilter which PII types to redact:\n```json\n{\n  \"text\": \"John Doe's email is john@example.com\",\n  \"mode\": \"placeholder\",\n  \"entities\": [\"EMAIL\"]  // Only redact emails\n}\n```\n\n**Supported entity types:** `PERSON`, `EMAIL`, `PHONE`, `CARD`\n\n## Example Response\n\n```json\n{\n  \"redacted_text\": \"Contact <PERSON> at <EMAIL>\",\n  \"redacted_json\": null,\n  \"items\": [\n    {\n      \"entity_type\": \"PERSON\",\n      \"path\": null,\n      \"start\": 8,\n      \"end\": 16,\n      \"score\": 0.85\n    },\n    {\n      \"entity_type\": \"EMAIL\",\n      \"path\": null,\n      \"start\": 20,\n      \"end\": 36,\n      \"score\": 1.0\n    }\n  ],\n  \"processing_time_ms\": 15.29\n}\n```",
+        "operationId": "rapidapi_redact_v1_redact_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RapidAPIRedactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RapidAPIRedactResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DetectJsonResponse": {
+        "properties": {
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/JsonFieldEntity"
+            },
+            "type": "array",
+            "title": "Entities",
+            "description": "List of detected PII entities with JSON paths"
+          }
+        },
+        "type": "object",
+        "title": "DetectJsonResponse",
+        "description": "Response schema for /detect endpoint (JSON mode).",
+        "examples": [
+          {
+            "entities": [
+              {
+                "end": 16,
+                "path": "user.email",
+                "start": 0,
+                "type": "EMAIL",
+                "value": "john@example.com"
+              }
+            ]
+          }
+        ]
+      },
+      "DetectResponse": {
+        "properties": {
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/DetectedEntity"
+            },
+            "type": "array",
+            "title": "Entities",
+            "description": "List of detected PII entities"
+          }
+        },
+        "type": "object",
+        "title": "DetectResponse",
+        "description": "Response schema for /detect endpoint (text mode).",
+        "examples": [
+          {
+            "entities": [
+              {
+                "end": 40,
+                "start": 20,
+                "type": "EMAIL",
+                "value": "john.doe@example.com"
+              }
+            ]
+          }
+        ]
+      },
+      "DetectedEntity": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "EMAIL",
+              "PHONE",
+              "CARD",
+              "PERSON"
+            ],
+            "title": "Type",
+            "description": "Type of PII entity detected"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "Original value of the detected entity"
+          },
+          "start": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Start",
+            "description": "Start position of the entity in the text"
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "End",
+            "description": "End position of the entity in the text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "value",
+          "start",
+          "end"
+        ],
+        "title": "DetectedEntity",
+        "description": "Schema for a detected PII entity."
+      },
+      "ErrorResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "description": "Error description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorResponse",
+        "description": "Response schema for error responses."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Service status",
+            "default": "ok"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "API version"
+          },
+          "uptime_seconds": {
+            "type": "number",
+            "title": "Uptime Seconds",
+            "description": "Service uptime in seconds"
+          },
+          "components": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Components",
+            "description": "Status of individual components (e.g., 'pii_detector': 'ready')"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "uptime_seconds"
+        ],
+        "title": "HealthResponse",
+        "description": "Response schema for health check endpoint."
+      },
+      "JsonFieldEntity": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "JSON path to the field (e.g., 'user.email' or 'items[0].name')"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "EMAIL",
+              "PHONE",
+              "CARD",
+              "PERSON"
+            ],
+            "title": "Type",
+            "description": "Type of PII entity detected"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "Original value of the detected entity"
+          },
+          "start": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Start",
+            "description": "Start position within the field value"
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "End",
+            "description": "End position within the field value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "type",
+          "value",
+          "start",
+          "end"
+        ],
+        "title": "JsonFieldEntity",
+        "description": "Schema for a detected entity within a JSON field."
+      },
+      "MaskJsonResponse": {
+        "properties": {
+          "json": {
+            "title": "Json",
+            "description": "Processed JSON with PII masked/redacted in string values"
+          },
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/JsonFieldEntity"
+            },
+            "type": "array",
+            "title": "Entities",
+            "description": "List of detected PII entities with JSON paths"
+          }
+        },
+        "type": "object",
+        "required": [
+          "json"
+        ],
+        "title": "MaskJsonResponse",
+        "description": "Response schema for /mask and /redact endpoints (JSON mode).",
+        "examples": [
+          {
+            "entities": [
+              {
+                "end": 8,
+                "path": "user.name",
+                "start": 0,
+                "type": "PERSON",
+                "value": "John Doe"
+              }
+            ],
+            "json": {
+              "message": "Call me at ***",
+              "user": {
+                "email": "***",
+                "name": "***"
+              }
+            }
+          }
+        ]
+      },
+      "MaskResponse": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Processed text with PII masked/redacted"
+          },
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/MaskedEntity"
+            },
+            "type": "array",
+            "title": "Entities",
+            "description": "List of detected and masked PII entities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "MaskResponse",
+        "description": "Response schema for /mask and /redact endpoints (text mode).",
+        "examples": [
+          {
+            "entities": [
+              {
+                "end": 16,
+                "masked_value": "***",
+                "start": 8,
+                "type": "PERSON",
+                "value": "John Doe"
+              }
+            ],
+            "text": "Contact *** at ***"
+          }
+        ]
+      },
+      "MaskedEntity": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "EMAIL",
+              "PHONE",
+              "CARD",
+              "PERSON"
+            ],
+            "title": "Type",
+            "description": "Type of PII entity detected"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "Original value of the detected entity"
+          },
+          "start": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Start",
+            "description": "Start position of the entity in the text"
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "End",
+            "description": "End position of the entity in the text"
+          },
+          "masked_value": {
+            "type": "string",
+            "title": "Masked Value",
+            "description": "Masked/redacted value that replaced the original"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "value",
+          "start",
+          "end",
+          "masked_value"
+        ],
+        "title": "MaskedEntity",
+        "description": "Schema for a detected and masked PII entity."
+      },
+      "RapidAPIRedactRequest": {
+        "properties": {
+          "text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32768,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text",
+            "description": "Text to process for PII redaction"
+          },
+          "json": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Json",
+            "description": "JSON object/array to process recursively (string values only)"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ru"
+            ],
+            "title": "Language",
+            "description": "Language of the content (en or ru)",
+            "default": "en"
+          },
+          "entities": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "PERSON",
+                    "EMAIL",
+                    "PHONE",
+                    "CARD"
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entities",
+            "description": "List of entity types to redact. If not provided, all types are redacted."
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "mask",
+              "placeholder"
+            ],
+            "title": "Mode",
+            "description": "Redaction mode: 'mask' replaces with ***, 'placeholder' replaces with <TYPE>",
+            "default": "mask"
+          }
+        },
+        "type": "object",
+        "title": "RapidAPIRedactRequest",
+        "description": "Request schema for RapidAPI /v1/redact endpoint.\n\nSupports both text and JSON input modes.\nEither 'text' or 'json' must be provided, but not both.",
+        "examples": [
+          {
+            "entities": [
+              "PERSON",
+              "EMAIL"
+            ],
+            "language": "en",
+            "mode": "placeholder",
+            "text": "Hello, my name is John Doe and my email is john@example.com"
+          },
+          {
+            "json": {
+              "message": "Call me at +1-555-123-4567",
+              "user": {
+                "email": "john@example.com",
+                "name": "John Doe"
+              }
+            },
+            "language": "en",
+            "mode": "mask"
+          }
+        ]
+      },
+      "RapidAPIRedactResponse": {
+        "properties": {
+          "redacted_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Redacted Text",
+            "description": "Text with PII replaced (text mode only)"
+          },
+          "redacted_json": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Redacted Json",
+            "description": "JSON with PII replaced in string values (JSON mode only)"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RedactedItem"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "List of detected and redacted entities"
+          },
+          "processing_time_ms": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Processing Time Ms",
+            "description": "Processing time in milliseconds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "processing_time_ms"
+        ],
+        "title": "RapidAPIRedactResponse",
+        "description": "Response schema for RapidAPI /v1/redact endpoint (text mode).",
+        "examples": [
+          {
+            "items": [
+              {
+                "end": 26,
+                "entity_type": "PERSON",
+                "score": 0.85,
+                "start": 18
+              }
+            ],
+            "processing_time_ms": 45.2,
+            "redacted_text": "Hello, my name is <PERSON> and my email is <EMAIL>"
+          },
+          {
+            "items": [
+              {
+                "end": 8,
+                "entity_type": "PERSON",
+                "path": "user.name",
+                "score": 0.85,
+                "start": 0
+              }
+            ],
+            "processing_time_ms": 52.1,
+            "redacted_json": {
+              "message": "Call me at ***",
+              "user": {
+                "email": "***",
+                "name": "***"
+              }
+            }
+          }
+        ]
+      },
+      "RedactedItem": {
+        "properties": {
+          "entity_type": {
+            "type": "string",
+            "title": "Entity Type",
+            "description": "Type of the detected entity (PERSON, EMAIL, PHONE, CARD)"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Path",
+            "description": "JSON path to the field (only for JSON mode)"
+          },
+          "start": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Start",
+            "description": "Start position in the original text/field"
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "End",
+            "description": "End position in the original text/field"
+          },
+          "score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Score",
+            "description": "Confidence score (1.0 for regex matches, NER model score for PERSON)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity_type",
+          "start",
+          "end",
+          "score"
+        ],
+        "title": "RedactedItem",
+        "description": "Schema for a single redacted item in the response."
+      },
+      "UnifiedRequest": {
+        "properties": {
+          "text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32768,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text",
+            "description": "Text to process for PII detection"
+          },
+          "json": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Json",
+            "description": "JSON object/array to process recursively (string values only)"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ru"
+            ],
+            "title": "Language",
+            "description": "Language of the content (en or ru)",
+            "default": "en"
+          },
+          "entities": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "EMAIL",
+                    "PHONE",
+                    "CARD",
+                    "PERSON"
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entities",
+            "description": "Filter to detect only specific entity types (e.g., ['EMAIL', 'PHONE'])"
+          }
+        },
+        "type": "object",
+        "title": "UnifiedRequest",
+        "description": "Request schema supporting both text and JSON input.\n\nEither 'text' or 'json' must be provided, but not both.\n- text: Plain text string to process\n- json: JSON object/array with string values to process recursively",
+        "examples": [
+          {
+            "language": "en",
+            "text": "Contact John Doe at john.doe@example.com"
+          },
+          {
+            "json": {
+              "message": "Call me at +1-555-123-4567",
+              "user": {
+                "email": "john@example.com",
+                "name": "John Doe"
+              }
+            },
+            "language": "en"
+          }
+        ]
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

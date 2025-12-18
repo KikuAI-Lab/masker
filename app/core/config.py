@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     # Request limits
     max_text_size: int = 32 * 1024  # 32KB for text field
     max_payload_size: int = 64 * 1024  # 64KB for entire JSON payload
+    request_timeout: int = 10  # 10s default timeout for intensive operations
     
     # Supported languages for NER
     supported_languages: list[str] = ["en", "ru"]
