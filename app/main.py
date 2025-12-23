@@ -309,9 +309,23 @@ async def metrics():
     )
 
 
-# Include API v1 routes
-app.include_router(v1_router, prefix="/api/v1")
+# Include API v1 routes (canonical path)
+app.include_router(v1_router, prefix="/v1")
 
-# Include RapidAPI facade routes
+# Include RapidAPI facade routes (also under /v1)
+# Note: rapidapi_router already has /v1 prefix, so check for conflicts
+# The rapidapi /v1/redact is more feature-rich, keep it alongside /v1/redact from v1_router
 app.include_router(rapidapi_router)
+
+# Legacy routes (deprecated - will be removed in 6 months)
+# Include same v1_router under /api/v1 for backward compatibility
+from fastapi import APIRouter
+legacy_router = APIRouter(
+    prefix="/api/v1",
+    deprecated=True,
+    tags=["Legacy"]
+)
+# Re-export the same routes with deprecation warning
+# Note: FastAPI will mark all these as deprecated in OpenAPI
+app.include_router(v1_router, prefix="/api/v1", deprecated=True, tags=["Legacy"])
 
