@@ -11,13 +11,17 @@ from fastapi import FastAPI, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
+from starlette.responses import Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, RedirectResponse
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 
 from app.api.v1.router import router as v1_router
 from app.api.rapidapi.redact import router as rapidapi_router
 from app.core.config import settings
 from app.core.logging import logger, log_request
+from app.middleware.metrics import MetricsMiddleware
+from app.middleware.rate_limit import RateLimitMiddleware
 from app.models.schemas import HealthResponse, ErrorResponse
 from app.services.pii_detector import get_detector
 
@@ -142,12 +146,10 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 app.add_middleware(RequestIDMiddleware)
 
 # Metrics middleware
-from app.middleware.metrics import MetricsMiddleware
 app.add_middleware(MetricsMiddleware)
 
 # Rate limiting middleware - protect API from abuse
 # Important for RapidAPI: 60 req/min per IP, 1000 req/min global
-from app.middleware.rate_limit import RateLimitMiddleware
 app.add_middleware(RateLimitMiddleware)
 
 # CORS middleware - allow cross-origin requests
@@ -301,9 +303,6 @@ async def health_check() -> HealthResponse:
 )
 async def metrics():
     """Export Prometheus metrics."""
-    from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
-    from starlette.responses import Response
-    
     return Response(
         content=generate_latest(),
         media_type=CONTENT_TYPE_LATEST
