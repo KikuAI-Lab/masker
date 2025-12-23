@@ -370,4 +370,4 @@ pytest tests/ -v
 
 ## License
 
-MIT
+AGPL-3.0. Copyright (c) 2025 KikuAI Lab
