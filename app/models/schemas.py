@@ -1,10 +1,10 @@
 """Pydantic schemas for API request/response validation."""
 
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal
+
 from pydantic import BaseModel, Field, model_validator
 
 from app.core.config import settings
-
 
 # Entity types
 EntityType = Literal["EMAIL", "PHONE", "CARD", "PERSON"]
@@ -12,7 +12,7 @@ EntityType = Literal["EMAIL", "PHONE", "CARD", "PERSON"]
 
 class TextRequest(BaseModel):
     """Request schema for text-only processing endpoints (legacy compatibility)."""
-    
+
     text: str = Field(
         ...,
         min_length=1,
@@ -23,7 +23,7 @@ class TextRequest(BaseModel):
         default="en",
         description="Language of the text (en or ru)"
     )
-    
+
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -38,19 +38,19 @@ class TextRequest(BaseModel):
 
 class UnifiedRequest(BaseModel):
     """Request schema supporting both text and JSON input.
-    
+
     Either 'text' or 'json' must be provided, but not both.
     - text: Plain text string to process
     - json: JSON object/array with string values to process recursively
     """
-    
-    text: Optional[str] = Field(
+
+    text: str | None = Field(
         default=None,
         min_length=1,
         max_length=settings.max_text_size,
         description="Text to process for PII detection"
     )
-    json: Optional[Any] = Field(
+    json: Any | None = Field(
         default=None,
         description="JSON object/array to process recursively (string values only)"
     )
@@ -58,11 +58,11 @@ class UnifiedRequest(BaseModel):
         default="en",
         description="Language of the content (en or ru)"
     )
-    entities: Optional[list[EntityType]] = Field(
+    entities: list[EntityType] | None = Field(
         default=None,
         description="Filter to detect only specific entity types (e.g., ['EMAIL', 'PHONE'])"
     )
-    
+
     @model_validator(mode="after")
     def validate_input_mode(self) -> "UnifiedRequest":
         """Ensure exactly one of text or json is provided."""
@@ -71,12 +71,12 @@ class UnifiedRequest(BaseModel):
         if self.text is not None and self.json is not None:
             raise ValueError("Provide either 'text' or 'json', not both")
         return self
-    
+
     @property
     def is_json_mode(self) -> bool:
         """Check if request is in JSON mode."""
         return self.json is not None
-    
+
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -98,7 +98,7 @@ class UnifiedRequest(BaseModel):
 
 class DetectedEntity(BaseModel):
     """Schema for a detected PII entity."""
-    
+
     type: EntityType = Field(
         ...,
         description="Type of PII entity detected"
@@ -121,7 +121,7 @@ class DetectedEntity(BaseModel):
 
 class MaskedEntity(DetectedEntity):
     """Schema for a detected and masked PII entity."""
-    
+
     masked_value: str = Field(
         ...,
         description="Masked/redacted value that replaced the original"
@@ -130,7 +130,7 @@ class MaskedEntity(DetectedEntity):
 
 class JsonFieldEntity(BaseModel):
     """Schema for a detected entity within a JSON field."""
-    
+
     path: str = Field(
         ...,
         description="JSON path to the field (e.g., 'user.email' or 'items[0].name')"
@@ -157,12 +157,12 @@ class JsonFieldEntity(BaseModel):
 
 class DetectResponse(BaseModel):
     """Response schema for /detect endpoint (text mode)."""
-    
+
     entities: list[DetectedEntity] = Field(
         default_factory=list,
         description="List of detected PII entities"
     )
-    
+
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -183,12 +183,12 @@ class DetectResponse(BaseModel):
 
 class DetectJsonResponse(BaseModel):
     """Response schema for /detect endpoint (JSON mode)."""
-    
+
     entities: list[JsonFieldEntity] = Field(
         default_factory=list,
         description="List of detected PII entities with JSON paths"
     )
-    
+
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -210,7 +210,7 @@ class DetectJsonResponse(BaseModel):
 
 class MaskResponse(BaseModel):
     """Response schema for /mask and /redact endpoints (text mode)."""
-    
+
     text: str = Field(
         ...,
         description="Processed text with PII masked/redacted"
@@ -219,7 +219,7 @@ class MaskResponse(BaseModel):
         default_factory=list,
         description="List of detected and masked PII entities"
     )
-    
+
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -242,7 +242,7 @@ class MaskResponse(BaseModel):
 
 class MaskJsonResponse(BaseModel):
     """Response schema for /mask and /redact endpoints (JSON mode)."""
-    
+
     json: Any = Field(
         ...,
         description="Processed JSON with PII masked/redacted in string values"
@@ -251,7 +251,7 @@ class MaskJsonResponse(BaseModel):
         default_factory=list,
         description="List of detected PII entities with JSON paths"
     )
-    
+
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -277,7 +277,7 @@ class MaskJsonResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     """Response schema for health check endpoint."""
-    
+
     status: str = Field(default="ok", description="Service status")
     version: str = Field(..., description="API version")
     uptime_seconds: float = Field(..., description="Service uptime in seconds")
@@ -289,5 +289,5 @@ class HealthResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     """Response schema for error responses."""
-    
+
     detail: str = Field(..., description="Error description")

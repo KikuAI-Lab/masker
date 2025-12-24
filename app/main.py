@@ -8,23 +8,22 @@ import uuid
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi.middleware.cors import CORSMiddleware
-from starlette import status
-from starlette.responses import Response
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+from starlette import status
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 
-from app.api.v1.router import router as v1_router
 from app.api.rapidapi.redact import router as rapidapi_router
+from app.api.v1.router import router as v1_router
 from app.core.config import settings
-from app.core.logging import logger, log_request
+from app.core.logging import log_request, logger
 from app.middleware.metrics import MetricsMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
-from app.models.schemas import HealthResponse, ErrorResponse
+from app.models.schemas import ErrorResponse, HealthResponse
 from app.services.pii_detector import get_detector
-
 
 # Global start time
 APP_START_TIME = time.time()
@@ -35,7 +34,7 @@ async def lifespan(app: FastAPI):
     """Application lifespan handler - load models on startup."""
     global APP_START_TIME
     APP_START_TIME = time.time()
-    
+
     logger.info("Starting Masker API...")
     # Pre-load the PII detector to warm up spaCy models
     get_detector()
@@ -48,16 +47,16 @@ app = FastAPI(
     title=settings.api_title,
     description="""
     **Masker API** - Privacy-first PII Redaction & Text Anonymization for LLMs.
-    
+
     Remove personal information from text and JSON before sending to ChatGPT, Claude, or any LLM.
-    
+
     ## 🔒 Privacy First
     - **No data storage** - All processing is in-memory
     - **No content logging** - Only metadata is logged
     - **Stateless** - Each request is independent
-    
+
     ## 🚀 Quick Start
-    
+
     **Text Mode:**
     ```json
     POST /v1/redact
@@ -66,7 +65,7 @@ app = FastAPI(
       "mode": "placeholder"
     }
     ```
-    
+
     **JSON Mode:**
     ```json
     POST /v1/redact
@@ -75,17 +74,17 @@ app = FastAPI(
       "mode": "placeholder"
     }
     ```
-    
+
     ## 📚 Endpoints
-    
+
     - **`POST /v1/redact`** - Main endpoint for PII redaction (supports text & JSON)
     - **`POST /api/v1/detect`** - Detect PII without modifying content
     - **`POST /api/v1/mask`** - Mask PII with `***`
     - **`POST /api/v1/redact`** - Redact PII with `[REDACTED]`
     - **`GET /health`** - Health check
-    
+
     ## 📖 Full Documentation
-    
+
     See [Wiki](https://github.com/KikuAI-Lab/masker/wiki) for complete documentation.
     """,
     version=settings.api_version,
@@ -126,20 +125,20 @@ app = FastAPI(
 # Request ID middleware - add unique ID to each request for tracking
 class RequestIDMiddleware(BaseHTTPMiddleware):
     """Add unique request ID to each request for tracking and debugging."""
-    
+
     async def dispatch(self, request: Request, call_next):
         # Get request ID from header or generate new one
         request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
-        
+
         # Add to request state for logging
         request.state.request_id = request_id
-        
+
         # Process request
         response = await call_next(request)
-        
+
         # Add request ID to response headers
         response.headers["X-Request-ID"] = request_id
-        
+
         return response
 
 
@@ -169,20 +168,20 @@ app.add_middleware(
 async def logging_middleware(request: Request, call_next):
     """Log request metadata without exposing content."""
     start_time = time.perf_counter()
-    
+
     # Get content length from headers (before reading body)
     content_length = int(request.headers.get("content-length", 0))
-    
+
     # Get request ID from state (set by RequestIDMiddleware)
     request_id = getattr(request.state, "request_id", "unknown")
-    
+
     response = await call_next(request)
-    
+
     duration_ms = (time.perf_counter() - start_time) * 1000
-    
+
     # Add processing time header
     response.headers["X-Processing-Time"] = f"{duration_ms:.2f}ms"
-    
+
     log_request(
         logger=logger,
         method=request.method,
@@ -192,7 +191,7 @@ async def logging_middleware(request: Request, call_next):
         duration_ms=duration_ms,
         request_id=request_id
     )
-    
+
     return response
 
 
@@ -200,7 +199,7 @@ async def logging_middleware(request: Request, call_next):
 async def size_limit_middleware(request: Request, call_next):
     """Reject requests that exceed the maximum allowed payload size."""
     content_length = int(request.headers.get("content-length", 0))
-    
+
     if content_length > settings.max_payload_size:
         return JSONResponse(
             status_code=status.HTTP_413_CONTENT_TOO_LARGE,
@@ -208,7 +207,7 @@ async def size_limit_middleware(request: Request, call_next):
                 "detail": f"Request body too large. Maximum allowed payload size is {settings.max_payload_size} bytes ({settings.max_payload_size // 1024}KB)."
             }
         )
-    
+
     return await call_next(request)
 
 
@@ -216,7 +215,7 @@ async def size_limit_middleware(request: Request, call_next):
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """Handle Pydantic validation errors with clean messages."""
     errors = exc.errors()
-    
+
     # Extract first error message for simplicity
     if errors:
         first_error = errors[0]
@@ -225,7 +224,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         detail = f"{loc}: {msg}" if loc else msg
     else:
         detail = "Validation error"
-    
+
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": detail}
@@ -275,14 +274,14 @@ No authentication required. Returns service status and version.
 async def health_check() -> HealthResponse:
     """Check if the service is running."""
     uptime = time.time() - APP_START_TIME
-    
+
     # Check if detector is loaded
     detector_status = "ready"
     try:
         get_detector()
     except Exception:
         detector_status = "error"
-        
+
     return HealthResponse(
         status="ok",
         version=settings.api_version,
@@ -320,6 +319,7 @@ app.include_router(rapidapi_router)
 # Legacy routes (deprecated - will be removed in 6 months)
 # Include same v1_router under /api/v1 for backward compatibility
 from fastapi import APIRouter
+
 legacy_router = APIRouter(
     prefix="/api/v1",
     deprecated=True,

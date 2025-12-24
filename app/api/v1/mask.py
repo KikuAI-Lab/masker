@@ -1,19 +1,19 @@
 """Mask endpoint - replace PII with asterisks in text or JSON."""
 
 from typing import Union
+
 from fastapi import APIRouter
 
 from app.models.schemas import (
-    UnifiedRequest,
-    MaskResponse,
-    MaskJsonResponse,
+    JsonFieldEntity,
     MaskedEntity,
-    JsonFieldEntity
+    MaskJsonResponse,
+    MaskResponse,
+    UnifiedRequest,
 )
-from app.services.pii_detector import get_detector
-from app.services.masking import mask_text
 from app.services.json_processor import mask_json
-
+from app.services.masking import mask_text
+from app.services.pii_detector import get_detector
 
 router = APIRouter(tags=["PII Masking"])
 
@@ -89,22 +89,22 @@ This endpoint masks all detected PII by replacing it with `***`, regardless of t
 **Note:** JSON structure is preserved. Only string values are modified.
 """
 )
-async def mask_pii(request: UnifiedRequest) -> Union[MaskResponse, MaskJsonResponse]:
+async def mask_pii(request: UnifiedRequest) -> MaskResponse | MaskJsonResponse:
     """Mask PII entities in the provided text or JSON.
-    
+
     Detects and replaces PII with asterisks:
     - Email addresses → ***
     - Phone numbers → ***
     - Credit card numbers → ***
     - Person names → ***
-    
+
     For JSON input, only string values are processed.
     The JSON structure is preserved.
     """
     if request.is_json_mode:
         # JSON mode - mask in all string values
         masked_data, entities = mask_json(request.json, request.language, request.entities)
-        
+
         json_entities = [
             JsonFieldEntity(
                 path=e.path,
@@ -115,15 +115,15 @@ async def mask_pii(request: UnifiedRequest) -> Union[MaskResponse, MaskJsonRespo
             )
             for e in entities
         ]
-        
+
         return MaskJsonResponse(json=masked_data, entities=json_entities)
     else:
         # Text mode - standard masking
         detector = get_detector()
         detected = detector.detect(request.text, request.language, request.entities)
-        
+
         masked_text, masked_entities = mask_text(request.text, detected)
-        
+
         entities = [
             MaskedEntity(
                 type=entity.type,
@@ -134,5 +134,5 @@ async def mask_pii(request: UnifiedRequest) -> Union[MaskResponse, MaskJsonRespo
             )
             for entity in masked_entities
         ]
-        
+
         return MaskResponse(text=masked_text, entities=entities)

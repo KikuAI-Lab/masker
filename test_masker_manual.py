@@ -4,10 +4,10 @@ Manual test script for Masker API - real user testing.
 Tests all endpoints as a real user would.
 """
 
-import httpx
 import json
-from typing import Dict, Any
+from typing import Any
 
+import httpx
 
 BASE_URL = "http://127.0.0.1:8000"
 
@@ -47,7 +47,7 @@ def test_health():
 def test_detect_text():
     """Test detect endpoint with text."""
     print_section("2. Detect PII - Text Mode")
-    
+
     test_cases = [
         {
             "name": "English text with email and name",
@@ -69,7 +69,7 @@ def test_detect_text():
             }
         },
     ]
-    
+
     success_count = 0
     for case in test_cases:
         print(f"\nTest: {case['name']}")
@@ -80,14 +80,14 @@ def test_detect_text():
                 success_count += 1
         except Exception as e:
             print_result("POST /api/v1/detect", 0, None, str(e))
-    
+
     return success_count == len(test_cases)
 
 
 def test_detect_json():
     """Test detect endpoint with JSON."""
     print_section("3. Detect PII - JSON Mode")
-    
+
     payload = {
         "json": {
             "user": {
@@ -102,7 +102,7 @@ def test_detect_json():
             }
         }
     }
-    
+
     try:
         response = httpx.post(f"{BASE_URL}/api/v1/detect", json=payload, timeout=10)
         print_result("POST /api/v1/detect (JSON)", response.status_code, response.json())
@@ -115,16 +115,16 @@ def test_detect_json():
 def test_mask_text():
     """Test mask endpoint with text."""
     print_section("4. Mask PII - Text Mode")
-    
+
     payload = {
         "text": "Contact John Doe at john@example.com or +1-555-9876"
     }
-    
+
     try:
         response = httpx.post(f"{BASE_URL}/api/v1/mask", json=payload, timeout=10)
         result = response.json()
         print_result("POST /api/v1/mask", response.status_code, result)
-        
+
         # Check if masking actually happened
         if response.status_code == 200:
             masked_text = result.get("text", "")
@@ -143,7 +143,7 @@ def test_mask_text():
 def test_mask_json():
     """Test mask endpoint with JSON."""
     print_section("5. Mask PII - JSON Mode")
-    
+
     payload = {
         "json": {
             "customer": {
@@ -153,7 +153,7 @@ def test_mask_json():
             }
         }
     }
-    
+
     try:
         response = httpx.post(f"{BASE_URL}/api/v1/mask", json=payload, timeout=10)
         print_result("POST /api/v1/mask (JSON)", response.status_code, response.json())
@@ -166,16 +166,16 @@ def test_mask_json():
 def test_redact_text():
     """Test redact endpoint with text."""
     print_section("6. Redact PII - Text Mode")
-    
+
     payload = {
         "text": "My name is Bob Smith, email bob@company.com, card 5105-1051-0510-5100"
     }
-    
+
     try:
         response = httpx.post(f"{BASE_URL}/api/v1/redact", json=payload, timeout=10)
         result = response.json()
         print_result("POST /api/v1/redact", response.status_code, result)
-        
+
         # Check if redaction happened
         if response.status_code == 200:
             redacted_text = result.get("text", "")
@@ -194,18 +194,18 @@ def test_redact_text():
 def test_rapidapi_redact_text():
     """Test RapidAPI facade endpoint with text."""
     print_section("7. RapidAPI Facade - Text with Placeholder Mode")
-    
+
     payload = {
         "text": "My name is Charlie Brown, email charlie@peanuts.com",
         "mode": "placeholder",
         "language": "en"
     }
-    
+
     try:
         response = httpx.post(f"{BASE_URL}/v1/redact", json=payload, timeout=10)
         result = response.json()
         print_result("POST /v1/redact (placeholder)", response.status_code, result)
-        
+
         if response.status_code == 200:
             redacted = result.get("redacted_text", "")
             if "<PERSON>" in redacted and "<EMAIL>" in redacted:
@@ -223,7 +223,7 @@ def test_rapidapi_redact_text():
 def test_rapidapi_redact_json():
     """Test RapidAPI facade endpoint with JSON."""
     print_section("8. RapidAPI Facade - JSON with Mask Mode")
-    
+
     payload = {
         "json": {
             "user": "David Lee",
@@ -231,7 +231,7 @@ def test_rapidapi_redact_json():
         },
         "mode": "mask"
     }
-    
+
     try:
         response = httpx.post(f"{BASE_URL}/v1/redact", json=payload, timeout=10)
         print_result("POST /v1/redact (JSON mask)", response.status_code, response.json())
@@ -244,17 +244,17 @@ def test_rapidapi_redact_json():
 def test_entity_filtering():
     """Test entity type filtering."""
     print_section("9. Entity Filtering - Only EMAIL")
-    
+
     payload = {
         "text": "Contact John at john@example.com or call +1-555-1234",
         "entities": ["EMAIL"]
     }
-    
+
     try:
         response = httpx.post(f"{BASE_URL}/api/v1/detect", json=payload, timeout=10)
         result = response.json()
         print_result("POST /api/v1/detect (filter EMAIL)", response.status_code, result)
-        
+
         if response.status_code == 200:
             entities = result.get("entities", [])
             if entities and all(e.get("type") == "EMAIL" for e in entities):
@@ -272,7 +272,7 @@ def test_entity_filtering():
 def test_error_cases():
     """Test error handling."""
     print_section("10. Error Handling")
-    
+
     test_cases = [
         {
             "name": "Empty text",
@@ -295,7 +295,7 @@ def test_error_cases():
             "expected_status": 400
         },
     ]
-    
+
     success_count = 0
     for case in test_cases:
         print(f"\nTest: {case['name']}")
@@ -308,20 +308,20 @@ def test_error_cases():
                 print(f"⚠️ Expected {case['expected_status']}, got {response.status_code}")
         except Exception as e:
             print(f"❌ Error: {e}")
-    
+
     return success_count == len(test_cases)
 
 
 def test_docs():
     """Test API documentation endpoints."""
     print_section("11. API Documentation")
-    
+
     endpoints = [
         ("GET /docs", f"{BASE_URL}/docs"),
         ("GET /redoc", f"{BASE_URL}/redoc"),
         ("GET /openapi.json", f"{BASE_URL}/openapi.json"),
     ]
-    
+
     success_count = 0
     for name, url in endpoints:
         try:
@@ -333,7 +333,7 @@ def test_docs():
                 print(f"⚠️ {name} - status {response.status_code}")
         except Exception as e:
             print(f"❌ {name} - Error: {e}")
-    
+
     return success_count == len(endpoints)
 
 
@@ -341,7 +341,7 @@ def main():
     """Run all tests."""
     print_section("🚀 MASKER API MANUAL TESTING")
     print("Testing all endpoints as a real user...")
-    
+
     results = {
         "Health Check": test_health(),
         "Detect Text": test_detect_text(),
@@ -355,19 +355,19 @@ def main():
         "Error Handling": test_error_cases(),
         "Documentation": test_docs(),
     }
-    
+
     print_section("📊 FINAL RESULTS")
     total = len(results)
     passed = sum(1 for v in results.values() if v)
-    
+
     for test_name, result in results.items():
         status = "✅ PASS" if result else "❌ FAIL"
         print(f"{status} - {test_name}")
-    
+
     print(f"\n{'=' * 80}")
     print(f"Total: {passed}/{total} tests passed ({passed/total*100:.1f}%)")
     print('=' * 80)
-    
+
     if passed == total:
         print("\n🎉 All tests passed! API is working correctly.")
         return 0

@@ -5,16 +5,12 @@ Supports both text and JSON input modes.
 """
 
 import time
+
 from fastapi import APIRouter
 
-from app.models.rapidapi_schemas import (
-    RapidAPIRedactRequest,
-    RapidAPIRedactResponse,
-    RedactedItem
-)
-from app.services.redaction import redact_text, get_entity_score
+from app.models.rapidapi_schemas import RapidAPIRedactRequest, RapidAPIRedactResponse, RedactedItem
 from app.services.json_processor import process_json_with_mode
-
+from app.services.redaction import redact_text
 
 router = APIRouter(prefix="/v1", tags=["Main API"])
 
@@ -103,7 +99,7 @@ Filter which PII types to redact:
 )
 async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactResponse:
     """Redact PII entities in the provided text or JSON.
-    
+
     This endpoint is designed for RapidAPI integration and provides:
     - Flexible input (text or JSON)
     - Flexible redaction modes (mask/placeholder)
@@ -112,10 +108,10 @@ async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactRespo
     - Processing time measurement
     """
     start_time = time.perf_counter()
-    
+
     # Convert entities filter to list of strings if provided
     entities_filter = list(request.entities) if request.entities else None
-    
+
     if request.is_json_mode:
         # JSON mode
         redacted_data, json_entities = process_json_with_mode(
@@ -124,9 +120,9 @@ async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactRespo
             mode=request.mode,
             entities_filter=entities_filter
         )
-        
+
         processing_time_ms = (time.perf_counter() - start_time) * 1000
-        
+
         items = [
             RedactedItem(
                 entity_type=e.type,
@@ -137,7 +133,7 @@ async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactRespo
             )
             for e in json_entities
         ]
-        
+
         return RapidAPIRedactResponse(
             redacted_text=None,
             redacted_json=redacted_data,
@@ -152,9 +148,9 @@ async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactRespo
             entities_filter=entities_filter,
             mode=request.mode
         )
-        
+
         processing_time_ms = (time.perf_counter() - start_time) * 1000
-        
+
         items = [
             RedactedItem(
                 entity_type=item.entity_type,
@@ -165,7 +161,7 @@ async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactRespo
             )
             for item in redacted_items
         ]
-        
+
         return RapidAPIRedactResponse(
             redacted_text=redacted_text_result,
             redacted_json=None,

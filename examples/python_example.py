@@ -1,5 +1,6 @@
-import requests
 import json
+
+import requests
 
 # Configuration
 API_URL = "http://localhost:8000/v1/redact"
@@ -16,7 +17,7 @@ def redact_text():
         "mode": "placeholder",
         "entities": ["PERSON", "EMAIL"]
     }
-    
+
     response = requests.post(API_URL, json=payload, headers=HEADERS)
     print("\n--- Text Redaction ---")
     print(json.dumps(response.json(), indent=2))
@@ -36,7 +37,7 @@ def redact_json():
         },
         "mode": "mask"
     }
-    
+
     response = requests.post(API_URL, json=payload, headers=HEADERS)
     print("\n--- JSON Redaction ---")
     print(json.dumps(response.json(), indent=2))

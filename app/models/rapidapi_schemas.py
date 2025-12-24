@@ -1,10 +1,10 @@
 """Pydantic schemas for RapidAPI facade endpoint."""
 
-from typing import Any, Literal, Optional
+from typing import Any, Literal
+
 from pydantic import BaseModel, Field, model_validator
 
 from app.core.config import settings
-
 
 # Supported entity types for filtering
 EntityTypeFilter = Literal["PERSON", "EMAIL", "PHONE", "CARD"]
@@ -15,18 +15,18 @@ RedactionMode = Literal["mask", "placeholder"]
 
 class RapidAPIRedactRequest(BaseModel):
     """Request schema for RapidAPI /v1/redact endpoint.
-    
+
     Supports both text and JSON input modes.
     Either 'text' or 'json' must be provided, but not both.
     """
-    
-    text: Optional[str] = Field(
+
+    text: str | None = Field(
         default=None,
         min_length=1,
         max_length=settings.max_text_size,
         description="Text to process for PII redaction"
     )
-    json: Optional[Any] = Field(
+    json: Any | None = Field(
         default=None,
         description="JSON object/array to process recursively (string values only)"
     )
@@ -34,7 +34,7 @@ class RapidAPIRedactRequest(BaseModel):
         default="en",
         description="Language of the content (en or ru)"
     )
-    entities: Optional[list[EntityTypeFilter]] = Field(
+    entities: list[EntityTypeFilter] | None = Field(
         default=None,
         description="List of entity types to redact. If not provided, all types are redacted."
     )
@@ -42,7 +42,7 @@ class RapidAPIRedactRequest(BaseModel):
         default="mask",
         description="Redaction mode: 'mask' replaces with ***, 'placeholder' replaces with <TYPE>"
     )
-    
+
     @model_validator(mode="after")
     def validate_input_mode(self) -> "RapidAPIRedactRequest":
         """Ensure exactly one of text or json is provided."""
@@ -51,12 +51,12 @@ class RapidAPIRedactRequest(BaseModel):
         if self.text is not None and self.json is not None:
             raise ValueError("Provide either 'text' or 'json', not both")
         return self
-    
+
     @property
     def is_json_mode(self) -> bool:
         """Check if request is in JSON mode."""
         return self.json is not None
-    
+
     model_config = {
         "json_schema_extra": {
             "examples": [
@@ -81,12 +81,12 @@ class RapidAPIRedactRequest(BaseModel):
 
 class RedactedItem(BaseModel):
     """Schema for a single redacted item in the response."""
-    
+
     entity_type: str = Field(
         ...,
         description="Type of the detected entity (PERSON, EMAIL, PHONE, CARD)"
     )
-    path: Optional[str] = Field(
+    path: str | None = Field(
         default=None,
         description="JSON path to the field (only for JSON mode)"
     )
@@ -110,12 +110,12 @@ class RedactedItem(BaseModel):
 
 class RapidAPIRedactResponse(BaseModel):
     """Response schema for RapidAPI /v1/redact endpoint (text mode)."""
-    
-    redacted_text: Optional[str] = Field(
+
+    redacted_text: str | None = Field(
         default=None,
         description="Text with PII replaced (text mode only)"
     )
-    redacted_json: Optional[Any] = Field(
+    redacted_json: Any | None = Field(
         default=None,
         description="JSON with PII replaced in string values (JSON mode only)"
     )
@@ -128,7 +128,7 @@ class RapidAPIRedactResponse(BaseModel):
         ge=0,
         description="Processing time in milliseconds"
     )
-    
+
     model_config = {
         "json_schema_extra": {
             "examples": [

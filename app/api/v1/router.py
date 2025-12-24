@@ -2,10 +2,9 @@
 
 from fastapi import APIRouter
 
+from app.api.v1.detect import router as detect_router
 from app.api.v1.mask import router as mask_router
 from app.api.v1.redact import router as redact_router
-from app.api.v1.detect import router as detect_router
-
 
 router = APIRouter(tags=["PII Processing"])
 
