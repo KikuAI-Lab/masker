@@ -4,7 +4,6 @@ Handles recursive traversal of JSON structures, processing only
 string values while preserving the original structure.
 """
 
-import copy
 from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
@@ -148,7 +147,8 @@ def mask_json(
         masked_text, masked_entities = mask_text(text, entities)
         return masked_text, entities  # Return original entities for reporting
     
-    return process_json_recursive(copy.deepcopy(data), mask_processor)
+    # Optimization: process_json_recursive creates a new structure, so deepcopy is redundant
+    return process_json_recursive(data, mask_processor)
 
 
 def redact_json(
@@ -173,7 +173,8 @@ def redact_json(
         redacted_text, _ = redact_text(text, entities)
         return redacted_text, entities
     
-    return process_json_recursive(copy.deepcopy(data), redact_processor)
+    # Optimization: process_json_recursive creates a new structure, so deepcopy is redundant
+    return process_json_recursive(data, redact_processor)
 
 
 def process_json_with_mode(
@@ -230,5 +231,6 @@ def process_json_with_mode(
                 result = result[:entity.start] + MASK_TOKEN + result[entity.end:]
             return result, detected
     
-    return process_json_recursive(copy.deepcopy(data), custom_processor)
+    # Optimization: process_json_recursive creates a new structure, so deepcopy is redundant
+    return process_json_recursive(data, custom_processor)
 
