@@ -25,14 +25,11 @@ info:
   license:
     name: AGPL-3.0
     url: https://www.gnu.org/licenses/agpl-3.0.html
-
 servers:
   - url: https://masker-api.p.rapidapi.com
     description: RapidAPI Production
-
 security:
   - RapidAPIKey: []
-
 paths:
   /v1/redact:
     post:
@@ -95,7 +92,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
   /health:
     get:
       operationId: healthCheck
@@ -111,7 +107,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
-
 components:
   securitySchemes:
     RapidAPIKey:
@@ -119,7 +114,6 @@ components:
       in: header
       name: X-RapidAPI-Key
       description: Your RapidAPI key
-
   schemas:
     RedactRequest:
       type: object
@@ -147,11 +141,10 @@ components:
           items:
             type: string
             enum: [EMAIL, PHONE, CARD, PERSON]
-          description: Entity types to redact (default: all)
+          description: "Entity types to redact (default: all)"
       oneOf:
         - required: [text]
         - required: [json]
-
     RedactResponse:
       type: object
       properties:
@@ -170,7 +163,6 @@ components:
         processing_time_ms:
           type: number
           description: Processing time in milliseconds
-
     DetectedEntity:
       type: object
       properties:
@@ -189,7 +181,6 @@ components:
         end:
           type: integer
           description: End position in text
-
     HealthResponse:
       type: object
       properties:
@@ -200,7 +191,6 @@ components:
           type: integer
         version:
           type: string
-
     ErrorResponse:
       type: object
       properties:

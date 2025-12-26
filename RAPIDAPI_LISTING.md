@@ -1,130 +1,44 @@
-# Masker API - RapidAPI Listing
-
-## Short Description
-PII Redaction & Text Anonymization API for AI pipelines
+# RapidAPI Listing Content
 
 ## Long Description
+**Your data is naked. Mask it.**
 
-### What is Masker?
+Every time you send customer data to a public LLM, you risk a leak. Names, emails, credit card numbers—once they leave your server, you lose control.
 
-Masker is a high-performance PII (Personally Identifiable Information) redaction API designed for AI/ML pipelines. It automatically detects and masks sensitive entities like names, emails, phones, and credit card numbers in both plain text and JSON structures.
+**Masker** is the firewall for your AI pipeline. It detects and obliterates sensitive PII entities in real-time, effectively anonymizing your prompts without breaking their context.
 
-### Why Use Masker?
+### Why Masker?
+*   **0% Retention:** We are stateless. Your data is processed in RAM and forgotten instantly.
+*   **High Velocity:** Built for high-throughput pipelines. <50ms latency P95.
+*   **Context Aware:** Unlike regex, our NER models understand context, distinguishing between a dollar amount and a credit card number.
 
-**🔒 Privacy-First**
-- Stateless design - no data storage or logging
-- GDPR/CCPA compliant
-- Process sensitive data safely before sending to LLMs
+### Core Features
+*   **Smart Redaction:** Replace PII with tokenized placeholders (e.g., `[EMAIL]`, `[PERSON]`) so LLMs can still understand the sentence structure.
+*   **JSON Support:** Submit complex JSON objects, and we'll recursively walk the tree to mask values while preserving keys and structure.
+*   **Multi-Language:** Strong support for English and Russian text.
 
-**⚡ High Performance**
-- Sub-100ms response times
-- Handles both text and JSON
-- Batch processing support
-
-**🎯 Accurate Detection**
-- Regex patterns for structured PII (emails, phones, cards)
-- spaCy NER for person name detection
-- Multi-language support (English, Russian)
-
-### Supported PII Types
-
-| Type | Example | Detection |
-|------|---------|-----------|
-| EMAIL | john@example.com | Regex |
-| PHONE | +1-555-123-4567 | Regex |
-| CARD | 4111-1111-1111-1111 | Regex + Luhn |
-| PERSON | John Doe | NER |
-
-### Redaction Modes
-
-- **mask** → `Contact ***` (default)
-- **placeholder** → `Contact <EMAIL>`
-- **redact** → `Contact [REDACTED]`
-
-### Use Cases
-
-1. **LLM Data Cleaning** - Strip PII before sending prompts to ChatGPT/Claude
-2. **Log Anonymization** - Redact user data from application logs
-3. **Analytics Preprocessing** - Anonymize data for GDPR compliance
-4. **Document Processing** - Batch redact PDFs, CSVs, JSON files
+**Stop feeding your secrets to the machine. Use Masker.**
 
 ---
 
-## Category
-Data > Text Processing
+## Terms of Use
 
-## Tags
-pii, pii-detection, pii-redaction, privacy, anonymization, gdpr, compliance, llm, text-processing, data-cleaning
+By using the Masker API ("Service"), you agree to the following terms:
 
----
+**1. No Malicious Use**
+You may not use the Service to:
+*   De-anonymize or re-identify individuals from redacted data.
+*   Process data you do not have permission to handle.
+*   Reverse engineer the underlying models or API logic.
 
-## Pricing Tiers
+**2. Data Privacy & Statelessness**
+The Service is **stateless**. We process your input text solely for the purpose of redaction and do not store, log, or train on your payloads. Once the response is returned, your data is wiped from our memory.
 
-### Basic (Free)
-- **Price:** $0/month
-- **Requests:** 100/month
-- **Rate Limit:** 10 requests/minute
-- **Features:** All endpoints, Email support
+**3. Disclaimer of Warranty**
+The Service is provided "AS IS". While we strive for high accuracy (>95% F1-score), no automated PII detection system is perfect. You remain largely responsible for ensuring your data compliance (GDPR, CCPA, HIPAA). We are not liable for any missed PII entities or subsequent data leaks.
 
-### Pro
-- **Price:** $9/month
-- **Requests:** 10,000/month
-- **Rate Limit:** 100 requests/minute
-- **Features:** Priority support
+**4. Fair Use**
+We reserve the right to throttle or terminate API keys that exhibit abusive behavior, consistent errors, or attempts to bypass rate limits.
 
-### Ultra
-- **Price:** $29/month
-- **Requests:** 50,000/month
-- **Rate Limit:** 500 requests/minute
-- **Features:** Priority support, Webhook notifications
-
-### Mega (Enterprise)
-- **Price:** $99/month
-- **Requests:** 250,000/month
-- **Rate Limit:** 2,000 requests/minute
-- **Features:** Dedicated support, Custom SLAs
-
----
-
-## API Endpoints
-
-### POST /v1/redact
-Redact PII from text or JSON.
-
-**Example Request:**
-```bash
-curl -X POST "https://masker-api.p.rapidapi.com/v1/redact" \
-  -H "X-RapidAPI-Key: YOUR_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Email john@example.com", "mode": "mask"}'
-```
-
-**Example Response:**
-```json
-{
-  "text": "Email ***",
-  "entities": [
-    {"type": "EMAIL", "redacted": "***", "start": 6, "end": 22}
-  ],
-  "processing_time_ms": 45.2
-}
-```
-
-### GET /health
-Health check endpoint.
-
----
-
-## Support
-
-- **Documentation:** https://github.com/KikuAI-Lab/masker/wiki
-- **GitHub:** https://github.com/KikuAI-Lab/masker
-- **Email:** support@kikuai.dev
-
----
-
-## Terms & Privacy
-
-- **Terms of Service:** https://kikuai.dev/legal/terms
-- **Privacy Policy:** https://kikuai.dev/legal/privacy
-- **License:** AGPL-3.0
+**5. Changes**
+We may update these terms or the API pricing at any time. Continued use signifies acceptance of the new terms.
