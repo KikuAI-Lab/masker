@@ -1,0 +1,34 @@
+# Default Masker Redaction Policy
+# This policy is used when no policy_id is specified in the request.
+
+version: 1
+
+# Redaction actions per PII category:
+#   - mask: replace with ***
+#   - placeholder: replace with <TYPE> (e.g., <EMAIL>)
+#   - hash: replace with first 8 chars of SHA256 hash
+#   - drop: remove entirely (empty string)
+#   - keep: do not redact
+categories:
+  email: mask
+  phone: mask
+  card: drop
+  person: placeholder
+
+# Behavior when redaction fails:
+#   - closed: block the request (do not forward to upstream)
+#   - open: forward as-is (log the error)
+fail_mode: closed
+
+# JSON path rules (optional)
+# json_rules:
+#   denylist_paths:
+#     - "$.user.ssn"
+#     - "$.payment.*"
+#   allowlist_paths:
+#     - "$.public_data.*"
+
+# Regex exceptions (optional)
+# exceptions:
+#   regex_allow:
+#     - "@company\\.com$"

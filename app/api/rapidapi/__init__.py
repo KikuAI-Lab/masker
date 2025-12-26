@@ -1,0 +1,2 @@
+"""RapidAPI facade endpoints."""
+

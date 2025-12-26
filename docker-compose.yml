@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  masker-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: masker-api
+    ports:
+      - "${MASKER_PORT:-8000}:8000"
+    environment:
+      # API Keys (format: "key1:tenant1,key2:tenant2")
+      - MASKER_API_KEYS=${MASKER_API_KEYS:-}
+
+      # Upstream LLM settings
+      - MASKER_UPSTREAM_URL=${MASKER_UPSTREAM_URL:-https://api.openai.com/v1/chat/completions}
+      - MASKER_UPSTREAM_TIMEOUT=${MASKER_UPSTREAM_TIMEOUT:-60}
+
+      # Policy settings
+      - MASKER_POLICIES_DIR=/app/policies
+      - MASKER_DEFAULT_POLICY_ID=${MASKER_DEFAULT_POLICY_ID:-default}
+      - MASKER_DEFAULT_FAIL_MODE=${MASKER_DEFAULT_FAIL_MODE:-closed}
+
+      # Audit settings
+      - MASKER_AUDIT_DIR=/app/audit
+      - MASKER_AUDIT_ENABLED=${MASKER_AUDIT_ENABLED:-true}
+    volumes:
+      # Mount policies directory for custom policies
+      - ./policies:/app/policies:ro
+      # Mount audit directory for persistent logs
+      - ./audit:/app/audit
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  audit:
