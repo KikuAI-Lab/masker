@@ -3,7 +3,7 @@
 Loads and applies redaction policies from YAML configuration files.
 """
 
-import os
+# import os  # unused
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path

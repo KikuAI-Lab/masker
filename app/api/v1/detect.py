@@ -1,6 +1,6 @@
 """Detect endpoint - find PII without modifying text or JSON."""
 
-from typing import Union
+# from typing import Union  # unused
 
 from fastapi import APIRouter
 
@@ -19,7 +19,7 @@ router = APIRouter(tags=["PII Detection"])
 
 @router.post(
     "/detect",
-    response_model=Union[DetectResponse, DetectJsonResponse],
+    response_model=DetectResponse | DetectJsonResponse,
     summary="🔍 Detect PII without modifying content",
     description="""
 **Scan text or JSON for PII entities without modifying the content.**

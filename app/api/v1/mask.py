@@ -1,6 +1,6 @@
 """Mask endpoint - replace PII with asterisks in text or JSON."""
 
-from typing import Union
+# from typing import Union  # unused
 
 from fastapi import APIRouter
 
@@ -20,7 +20,7 @@ router = APIRouter(tags=["PII Masking"])
 
 @router.post(
     "/mask",
-    response_model=Union[MaskResponse, MaskJsonResponse],
+    response_model=MaskResponse | MaskJsonResponse,
     summary="🎭 Mask PII with asterisks (***)",
     description="""
 **Replace detected PII entities with asterisks (`***`).**

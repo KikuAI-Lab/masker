@@ -14,13 +14,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.core.config import settings
 from app.middleware.auth import require_api_key
-from app.models.proxy_schemas import (
-    ChatCompletionsRequest,
-    ChatMessage,
-    RedactionMetadata,
-)
+from app.models.proxy_schemas import ChatCompletionsRequest, RedactionMetadata
 from app.services.audit import get_audit_logger
-from app.services.policy import get_policy_service, RedactionAction
+from app.services.policy import RedactionAction, get_policy_service
 from app.services.redaction import redact_text
 
 

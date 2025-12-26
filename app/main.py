@@ -7,7 +7,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -16,9 +16,9 @@ from starlette import status
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
+from app.api.proxy import router as proxy_router
 from app.api.rapidapi.redact import router as rapidapi_router
 from app.api.v1.router import router as v1_router
-from app.api.proxy import router as proxy_router
 from app.core.config import settings
 from app.core.logging import log_request, logger
 from app.middleware.metrics import MetricsMiddleware
@@ -31,7 +31,7 @@ APP_START_TIME = time.time()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     """Application lifespan handler - load models on startup."""
     global APP_START_TIME
     APP_START_TIME = time.time()
@@ -213,14 +213,14 @@ async def size_limit_middleware(request: Request, call_next):
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+async def validation_exception_handler(_request: Request, exc: RequestValidationError):
     """Handle Pydantic validation errors with clean messages."""
     errors = exc.errors()
 
     # Extract first error message for simplicity
     if errors:
         first_error = errors[0]
-        loc = " -> ".join(str(l) for l in first_error.get("loc", []))
+        loc = " -> ".join(str(item) for item in first_error.get("loc", []))
         msg = first_error.get("msg", "Validation error")
         detail = f"{loc}: {msg}" if loc else msg
     else:
@@ -233,7 +233,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 @app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
+async def global_exception_handler(_request: Request, _exc: Exception):
     """Handle unexpected exceptions without exposing details."""
     logger.exception("Unexpected error processing request")
     return JSONResponse(
@@ -322,14 +322,4 @@ app.include_router(proxy_router)
 
 # Legacy routes (deprecated - will be removed in 6 months)
 # Include same v1_router under /api/v1 for backward compatibility
-from fastapi import APIRouter
-
-legacy_router = APIRouter(
-    prefix="/api/v1",
-    deprecated=True,
-    tags=["Legacy"]
-)
-# Re-export the same routes with deprecation warning
-# Note: FastAPI will mark all these as deprecated in OpenAPI
 app.include_router(v1_router, prefix="/api/v1", deprecated=True, tags=["Legacy"])
-

@@ -4,6 +4,7 @@ This module provides the PIIDetector class which identifies
 personally identifiable information in text.
 """
 
+import contextlib
 import re
 from dataclasses import dataclass
 
@@ -89,11 +90,8 @@ class PIIDetector:
         }
 
         for lang, model_name in models_to_load.items():
-            try:
+            with contextlib.suppress(OSError):
                 self._nlp_models[lang] = spacy.load(model_name)
-            except OSError:
-                # Model not installed - skip it
-                pass
 
     def _get_nlp(self, language: str) -> Language | None:
         """Get spaCy model for the specified language."""

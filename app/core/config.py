@@ -38,23 +38,23 @@ class Settings(BaseSettings):
     placeholder_email: str = "<EMAIL>"
     placeholder_phone: str = "<PHONE>"
     placeholder_card: str = "<CARD>"
-    
+
     # ========================================
     # Safe-to-LLM Proxy Settings
     # ========================================
-    
+
     # Upstream LLM settings
     upstream_url: str = "https://api.openai.com/v1/chat/completions"
     upstream_timeout: int = 60  # Timeout for upstream requests in seconds
-    
+
     # API Keys (format: "key1:tenant1,key2:tenant2")
     api_keys: str = ""
-    
+
     # Policy settings
     policies_dir: str = "./policies"
     default_policy_id: str = "default"
     default_fail_mode: str = "closed"  # "closed" or "open"
-    
+
     # Audit settings
     audit_dir: str = "./audit"
     audit_enabled: bool = True

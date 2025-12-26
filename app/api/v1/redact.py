@@ -1,6 +1,6 @@
 """Redact endpoint - replace PII with [REDACTED] in text or JSON."""
 
-from typing import Union
+# from typing import Union  # unused
 
 from fastapi import APIRouter
 
@@ -20,7 +20,7 @@ router = APIRouter(tags=["PII Redaction"])
 
 @router.post(
     "/redact",
-    response_model=Union[MaskResponse, MaskJsonResponse],
+    response_model=MaskResponse | MaskJsonResponse,
     summary="🔒 Redact PII with [REDACTED]",
     description="""
 **Replace detected PII entities with `[REDACTED]` placeholder.**
