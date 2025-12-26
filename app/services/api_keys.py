@@ -4,7 +4,6 @@ Simple API key validation for multi-tenant authentication.
 Keys are loaded from environment variable MASKER_API_KEYS.
 """
 
-
 from app.core.config import settings
 
 

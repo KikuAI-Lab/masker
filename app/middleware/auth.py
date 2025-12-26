@@ -3,7 +3,6 @@
 Provides FastAPI dependencies for API key authentication.
 """
 
-
 from fastapi import Header, HTTPException, Request, status
 
 from app.services.api_keys import get_api_key_service

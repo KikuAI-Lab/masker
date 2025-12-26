@@ -26,20 +26,23 @@ class MetricsMiddleware(BaseHTTPMiddleware):
             if path.startswith("/api/v1/"):
                 # Keep specific API paths
                 pass
-            elif path.startswith("/v1/") or path in ["/health", "/metrics", "/docs", "/openapi.json", "/redoc"]:
+            elif path.startswith("/v1/") or path in [
+                "/health",
+                "/metrics",
+                "/docs",
+                "/openapi.json",
+                "/redoc",
+            ]:
                 pass
             else:
                 path = "other"
 
             HTTP_REQUESTS_TOTAL.labels(
-                method=request.method,
-                endpoint=path,
-                status=status_code
+                method=request.method, endpoint=path, status=status_code
             ).inc()
 
-            HTTP_REQUEST_DURATION_SECONDS.labels(
-                method=request.method,
-                endpoint=path
-            ).observe(duration)
+            HTTP_REQUEST_DURATION_SECONDS.labels(method=request.method, endpoint=path).observe(
+                duration
+            )
 
         return response

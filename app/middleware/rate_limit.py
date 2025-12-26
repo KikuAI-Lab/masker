@@ -37,10 +37,7 @@ class TokenBucket:
         elapsed = now - self.last_refill
 
         # Refill tokens based on time elapsed
-        self.tokens = min(
-            self.capacity,
-            self.tokens + elapsed * self.refill_rate
-        )
+        self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)
         self.last_refill = now
 
         if self.tokens >= tokens:
@@ -80,8 +77,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         if RateLimitMiddleware._global_bucket is None:
             RateLimitMiddleware._global_bucket = TokenBucket(
-                self.GLOBAL_CAPACITY,
-                self.GLOBAL_REFILL_RATE
+                self.GLOBAL_CAPACITY, self.GLOBAL_REFILL_RATE
             )
 
     def _get_client_ip(self, request: Request) -> str:
@@ -102,10 +98,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     def _get_or_create_bucket(self, client_ip: str) -> TokenBucket:
         """Get or create token bucket for client IP."""
         if client_ip not in self._buckets:
-            self._buckets[client_ip] = TokenBucket(
-                self.PER_IP_CAPACITY,
-                self.PER_IP_REFILL_RATE
-            )
+            self._buckets[client_ip] = TokenBucket(self.PER_IP_CAPACITY, self.PER_IP_REFILL_RATE)
         return self._buckets[client_ip]
 
     def _cleanup_old_buckets(self):
@@ -116,8 +109,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         # Remove buckets that haven't been used recently
         inactive_keys = [
-            ip for ip, bucket in self._buckets.items()
-            if now - bucket.last_refill > self.BUCKET_TTL
+            ip for ip, bucket in self._buckets.items() if now - bucket.last_refill > self.BUCKET_TTL
         ]
 
         for ip in inactive_keys:
@@ -144,14 +136,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 content={
                     "detail": "Global rate limit exceeded. Please try again later.",
-                    "retry_after": int(global_retry) + 1
+                    "retry_after": int(global_retry) + 1,
                 },
                 headers={
                     "Retry-After": str(int(global_retry) + 1),
                     "X-RateLimit-Limit": str(self.GLOBAL_CAPACITY),
                     "X-RateLimit-Remaining": "0",
-                    "X-RateLimit-Reset": str(int(time.time() + global_retry))
-                }
+                    "X-RateLimit-Reset": str(int(time.time() + global_retry)),
+                },
             )
 
         # Check per-IP rate limit
@@ -164,14 +156,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 content={
                     "detail": f"Rate limit exceeded for your IP. Max {self.PER_IP_CAPACITY} requests per minute.",
-                    "retry_after": int(ip_retry) + 1
+                    "retry_after": int(ip_retry) + 1,
                 },
                 headers={
                     "Retry-After": str(int(ip_retry) + 1),
                     "X-RateLimit-Limit": str(self.PER_IP_CAPACITY),
                     "X-RateLimit-Remaining": "0",
-                    "X-RateLimit-Reset": str(int(time.time() + ip_retry))
-                }
+                    "X-RateLimit-Reset": str(int(time.time() + ip_retry)),
+                },
             )
 
         # Process request

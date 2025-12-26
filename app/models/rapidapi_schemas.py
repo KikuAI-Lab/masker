@@ -24,23 +24,21 @@ class RapidAPIRedactRequest(BaseModel):
         default=None,
         min_length=1,
         max_length=settings.max_text_size,
-        description="Text to process for PII redaction"
+        description="Text to process for PII redaction",
     )
     json: Any | None = Field(
-        default=None,
-        description="JSON object/array to process recursively (string values only)"
+        default=None, description="JSON object/array to process recursively (string values only)"
     )
     language: Literal["en", "ru"] = Field(
-        default="en",
-        description="Language of the content (en or ru)"
+        default="en", description="Language of the content (en or ru)"
     )
     entities: list[EntityTypeFilter] | None = Field(
         default=None,
-        description="List of entity types to redact. If not provided, all types are redacted."
+        description="List of entity types to redact. If not provided, all types are redacted.",
     )
     mode: RedactionMode = Field(
         default="mask",
-        description="Redaction mode: 'mask' replaces with ***, 'placeholder' replaces with <TYPE>"
+        description="Redaction mode: 'mask' replaces with ***, 'placeholder' replaces with <TYPE>",
     )
 
     @model_validator(mode="after")
@@ -64,16 +62,16 @@ class RapidAPIRedactRequest(BaseModel):
                     "text": "Hello, my name is John Doe and my email is john@example.com",
                     "language": "en",
                     "entities": ["PERSON", "EMAIL"],
-                    "mode": "placeholder"
+                    "mode": "placeholder",
                 },
                 {
                     "json": {
                         "user": {"name": "John Doe", "email": "john@example.com"},
-                        "message": "Call me at +1-555-123-4567"
+                        "message": "Call me at +1-555-123-4567",
                     },
                     "language": "en",
-                    "mode": "mask"
-                }
+                    "mode": "mask",
+                },
             ]
         }
     }
@@ -83,28 +81,18 @@ class RedactedItem(BaseModel):
     """Schema for a single redacted item in the response."""
 
     entity_type: str = Field(
-        ...,
-        description="Type of the detected entity (PERSON, EMAIL, PHONE, CARD)"
+        ..., description="Type of the detected entity (PERSON, EMAIL, PHONE, CARD)"
     )
     path: str | None = Field(
-        default=None,
-        description="JSON path to the field (only for JSON mode)"
+        default=None, description="JSON path to the field (only for JSON mode)"
     )
-    start: int = Field(
-        ...,
-        ge=0,
-        description="Start position in the original text/field"
-    )
-    end: int = Field(
-        ...,
-        ge=0,
-        description="End position in the original text/field"
-    )
+    start: int = Field(..., ge=0, description="Start position in the original text/field")
+    end: int = Field(..., ge=0, description="End position in the original text/field")
     score: float = Field(
         ...,
         ge=0.0,
         le=1.0,
-        description="Confidence score (1.0 for regex matches, NER model score for PERSON)"
+        description="Confidence score (1.0 for regex matches, NER model score for PERSON)",
     )
 
 
@@ -112,22 +100,15 @@ class RapidAPIRedactResponse(BaseModel):
     """Response schema for RapidAPI /v1/redact endpoint (text mode)."""
 
     redacted_text: str | None = Field(
-        default=None,
-        description="Text with PII replaced (text mode only)"
+        default=None, description="Text with PII replaced (text mode only)"
     )
     redacted_json: Any | None = Field(
-        default=None,
-        description="JSON with PII replaced in string values (JSON mode only)"
+        default=None, description="JSON with PII replaced in string values (JSON mode only)"
     )
     items: list[RedactedItem] = Field(
-        default_factory=list,
-        description="List of detected and redacted entities"
+        default_factory=list, description="List of detected and redacted entities"
     )
-    processing_time_ms: float = Field(
-        ...,
-        ge=0,
-        description="Processing time in milliseconds"
-    )
+    processing_time_ms: float = Field(..., ge=0, description="Processing time in milliseconds")
 
     model_config = {
         "json_schema_extra": {
@@ -141,16 +122,16 @@ class RapidAPIRedactResponse(BaseModel):
                             "path": None,
                             "start": 18,
                             "end": 26,
-                            "score": 0.85
+                            "score": 0.85,
                         }
                     ],
-                    "processing_time_ms": 45.2
+                    "processing_time_ms": 45.2,
                 },
                 {
                     "redacted_text": None,
                     "redacted_json": {
                         "user": {"name": "***", "email": "***"},
-                        "message": "Call me at ***"
+                        "message": "Call me at ***",
                     },
                     "items": [
                         {
@@ -158,11 +139,11 @@ class RapidAPIRedactResponse(BaseModel):
                             "path": "user.name",
                             "start": 0,
                             "end": 8,
-                            "score": 0.85
+                            "score": 0.85,
                         }
                     ],
-                    "processing_time_ms": 52.1
-                }
+                    "processing_time_ms": 52.1,
+                },
             ]
         }
     }

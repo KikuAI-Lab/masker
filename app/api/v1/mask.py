@@ -87,7 +87,7 @@ This endpoint masks all detected PII by replacing it with `***`, regardless of t
 ```
 
 **Note:** JSON structure is preserved. Only string values are modified.
-"""
+""",
 )
 async def mask_pii(request: UnifiedRequest) -> MaskResponse | MaskJsonResponse:
     """Mask PII entities in the provided text or JSON.
@@ -106,13 +106,7 @@ async def mask_pii(request: UnifiedRequest) -> MaskResponse | MaskJsonResponse:
         masked_data, entities = mask_json(request.json, request.language, request.entities)
 
         json_entities = [
-            JsonFieldEntity(
-                path=e.path,
-                type=e.type,
-                value=e.value,
-                start=e.start,
-                end=e.end
-            )
+            JsonFieldEntity(path=e.path, type=e.type, value=e.value, start=e.start, end=e.end)
             for e in entities
         ]
 
@@ -130,7 +124,7 @@ async def mask_pii(request: UnifiedRequest) -> MaskResponse | MaskJsonResponse:
                 value=entity.value,
                 start=entity.start,
                 end=entity.end,
-                masked_value=entity.masked_value
+                masked_value=entity.masked_value,
             )
             for entity in masked_entities
         ]

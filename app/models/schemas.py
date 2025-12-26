@@ -17,11 +17,10 @@ class TextRequest(BaseModel):
         ...,
         min_length=1,
         max_length=settings.max_text_size,
-        description="Text to process for PII detection"
+        description="Text to process for PII detection",
     )
     language: Literal["en", "ru"] = Field(
-        default="en",
-        description="Language of the text (en or ru)"
+        default="en", description="Language of the text (en or ru)"
     )
 
     model_config = {
@@ -29,7 +28,7 @@ class TextRequest(BaseModel):
             "examples": [
                 {
                     "text": "Contact John Doe at john.doe@example.com or +1-555-123-4567",
-                    "language": "en"
+                    "language": "en",
                 }
             ]
         }
@@ -48,19 +47,17 @@ class UnifiedRequest(BaseModel):
         default=None,
         min_length=1,
         max_length=settings.max_text_size,
-        description="Text to process for PII detection"
+        description="Text to process for PII detection",
     )
     json: Any | None = Field(
-        default=None,
-        description="JSON object/array to process recursively (string values only)"
+        default=None, description="JSON object/array to process recursively (string values only)"
     )
     language: Literal["en", "ru"] = Field(
-        default="en",
-        description="Language of the content (en or ru)"
+        default="en", description="Language of the content (en or ru)"
     )
     entities: list[EntityType] | None = Field(
         default=None,
-        description="Filter to detect only specific entity types (e.g., ['EMAIL', 'PHONE'])"
+        description="Filter to detect only specific entity types (e.g., ['EMAIL', 'PHONE'])",
     )
 
     @model_validator(mode="after")
@@ -80,17 +77,14 @@ class UnifiedRequest(BaseModel):
     model_config = {
         "json_schema_extra": {
             "examples": [
-                {
-                    "text": "Contact John Doe at john.doe@example.com",
-                    "language": "en"
-                },
+                {"text": "Contact John Doe at john.doe@example.com", "language": "en"},
                 {
                     "json": {
                         "user": {"name": "John Doe", "email": "john@example.com"},
-                        "message": "Call me at +1-555-123-4567"
+                        "message": "Call me at +1-555-123-4567",
                     },
-                    "language": "en"
-                }
+                    "language": "en",
+                },
             ]
         }
     }
@@ -99,68 +93,35 @@ class UnifiedRequest(BaseModel):
 class DetectedEntity(BaseModel):
     """Schema for a detected PII entity."""
 
-    type: EntityType = Field(
-        ...,
-        description="Type of PII entity detected"
-    )
-    value: str = Field(
-        ...,
-        description="Original value of the detected entity"
-    )
-    start: int = Field(
-        ...,
-        ge=0,
-        description="Start position of the entity in the text"
-    )
-    end: int = Field(
-        ...,
-        ge=0,
-        description="End position of the entity in the text"
-    )
+    type: EntityType = Field(..., description="Type of PII entity detected")
+    value: str = Field(..., description="Original value of the detected entity")
+    start: int = Field(..., ge=0, description="Start position of the entity in the text")
+    end: int = Field(..., ge=0, description="End position of the entity in the text")
 
 
 class MaskedEntity(DetectedEntity):
     """Schema for a detected and masked PII entity."""
 
-    masked_value: str = Field(
-        ...,
-        description="Masked/redacted value that replaced the original"
-    )
+    masked_value: str = Field(..., description="Masked/redacted value that replaced the original")
 
 
 class JsonFieldEntity(BaseModel):
     """Schema for a detected entity within a JSON field."""
 
     path: str = Field(
-        ...,
-        description="JSON path to the field (e.g., 'user.email' or 'items[0].name')"
+        ..., description="JSON path to the field (e.g., 'user.email' or 'items[0].name')"
     )
-    type: EntityType = Field(
-        ...,
-        description="Type of PII entity detected"
-    )
-    value: str = Field(
-        ...,
-        description="Original value of the detected entity"
-    )
-    start: int = Field(
-        ...,
-        ge=0,
-        description="Start position within the field value"
-    )
-    end: int = Field(
-        ...,
-        ge=0,
-        description="End position within the field value"
-    )
+    type: EntityType = Field(..., description="Type of PII entity detected")
+    value: str = Field(..., description="Original value of the detected entity")
+    start: int = Field(..., ge=0, description="Start position within the field value")
+    end: int = Field(..., ge=0, description="End position within the field value")
 
 
 class DetectResponse(BaseModel):
     """Response schema for /detect endpoint (text mode)."""
 
     entities: list[DetectedEntity] = Field(
-        default_factory=list,
-        description="List of detected PII entities"
+        default_factory=list, description="List of detected PII entities"
     )
 
     model_config = {
@@ -168,12 +129,7 @@ class DetectResponse(BaseModel):
             "examples": [
                 {
                     "entities": [
-                        {
-                            "type": "EMAIL",
-                            "value": "john.doe@example.com",
-                            "start": 20,
-                            "end": 40
-                        }
+                        {"type": "EMAIL", "value": "john.doe@example.com", "start": 20, "end": 40}
                     ]
                 }
             ]
@@ -185,8 +141,7 @@ class DetectJsonResponse(BaseModel):
     """Response schema for /detect endpoint (JSON mode)."""
 
     entities: list[JsonFieldEntity] = Field(
-        default_factory=list,
-        description="List of detected PII entities with JSON paths"
+        default_factory=list, description="List of detected PII entities with JSON paths"
     )
 
     model_config = {
@@ -199,7 +154,7 @@ class DetectJsonResponse(BaseModel):
                             "type": "EMAIL",
                             "value": "john@example.com",
                             "start": 0,
-                            "end": 16
+                            "end": 16,
                         }
                     ]
                 }
@@ -211,13 +166,9 @@ class DetectJsonResponse(BaseModel):
 class MaskResponse(BaseModel):
     """Response schema for /mask and /redact endpoints (text mode)."""
 
-    text: str = Field(
-        ...,
-        description="Processed text with PII masked/redacted"
-    )
+    text: str = Field(..., description="Processed text with PII masked/redacted")
     entities: list[MaskedEntity] = Field(
-        default_factory=list,
-        description="List of detected and masked PII entities"
+        default_factory=list, description="List of detected and masked PII entities"
     )
 
     model_config = {
@@ -231,9 +182,9 @@ class MaskResponse(BaseModel):
                             "value": "John Doe",
                             "masked_value": "***",
                             "start": 8,
-                            "end": 16
+                            "end": 16,
                         }
-                    ]
+                    ],
                 }
             ]
         }
@@ -243,32 +194,25 @@ class MaskResponse(BaseModel):
 class MaskJsonResponse(BaseModel):
     """Response schema for /mask and /redact endpoints (JSON mode)."""
 
-    json: Any = Field(
-        ...,
-        description="Processed JSON with PII masked/redacted in string values"
-    )
+    json: Any = Field(..., description="Processed JSON with PII masked/redacted in string values")
     entities: list[JsonFieldEntity] = Field(
-        default_factory=list,
-        description="List of detected PII entities with JSON paths"
+        default_factory=list, description="List of detected PII entities with JSON paths"
     )
 
     model_config = {
         "json_schema_extra": {
             "examples": [
                 {
-                    "json": {
-                        "user": {"name": "***", "email": "***"},
-                        "message": "Call me at ***"
-                    },
+                    "json": {"user": {"name": "***", "email": "***"}, "message": "Call me at ***"},
                     "entities": [
                         {
                             "path": "user.name",
                             "type": "PERSON",
                             "value": "John Doe",
                             "start": 0,
-                            "end": 8
+                            "end": 8,
                         }
-                    ]
+                    ],
                 }
             ]
         }
@@ -283,7 +227,7 @@ class HealthResponse(BaseModel):
     uptime_seconds: float = Field(..., description="Service uptime in seconds")
     components: dict[str, str] = Field(
         default_factory=dict,
-        description="Status of individual components (e.g., 'pii_detector': 'ready')"
+        description="Status of individual components (e.g., 'pii_detector': 'ready')",
     )
 
 

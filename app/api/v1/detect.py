@@ -76,7 +76,7 @@ Use this endpoint when you only need to identify PII without redacting it.
 ```
 
 For JSON mode, each entity includes a `path` field showing its location (e.g., `"user.name"`).
-"""
+""",
 )
 async def detect_pii(request: UnifiedRequest) -> DetectResponse | DetectJsonResponse:
     """Detect PII entities in the provided text or JSON.
@@ -95,13 +95,7 @@ async def detect_pii(request: UnifiedRequest) -> DetectResponse | DetectJsonResp
         _, entities = detect_json(request.json, request.language, request.entities)
 
         json_entities = [
-            JsonFieldEntity(
-                path=e.path,
-                type=e.type,
-                value=e.value,
-                start=e.start,
-                end=e.end
-            )
+            JsonFieldEntity(path=e.path, type=e.type, value=e.value, start=e.start, end=e.end)
             for e in entities
         ]
 
@@ -112,12 +106,7 @@ async def detect_pii(request: UnifiedRequest) -> DetectResponse | DetectJsonResp
         detected = detector.detect(request.text, request.language, request.entities)
 
         entities = [
-            DetectedEntity(
-                type=entity.type,
-                value=entity.value,
-                start=entity.start,
-                end=entity.end
-            )
+            DetectedEntity(type=entity.type, value=entity.value, start=entity.start, end=entity.end)
             for entity in detected
         ]
 

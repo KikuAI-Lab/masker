@@ -37,8 +37,7 @@ NER_DEFAULT_SCORE = 0.85  # Default score for NER entities
 
 
 def filter_entities(
-    entities: list[DetectedEntity],
-    allowed_types: list[str] | None = None
+    entities: list[DetectedEntity], allowed_types: list[str] | None = None
 ) -> list[DetectedEntity]:
     """Filter entities by allowed types.
 
@@ -75,9 +74,7 @@ def get_entity_score(entity: DetectedEntity) -> float:
 
 
 def apply_redaction(
-    text: str,
-    entities: Sequence[DetectedEntity],
-    mode: str
+    text: str, entities: Sequence[DetectedEntity], mode: str
 ) -> tuple[str, list[RedactedEntity]]:
     """Apply redaction to text based on mode.
 
@@ -106,15 +103,17 @@ def apply_redaction(
             replacement = MASK_TOKEN
 
         # Replace in text
-        result = result[:entity.start] + replacement + result[entity.end:]
+        result = result[: entity.start] + replacement + result[entity.end :]
 
         # Record redacted entity with score
-        redacted_items.append(RedactedEntity(
-            entity_type=entity.type,
-            start=entity.start,
-            end=entity.end,
-            score=get_entity_score(entity)
-        ))
+        redacted_items.append(
+            RedactedEntity(
+                entity_type=entity.type,
+                start=entity.start,
+                end=entity.end,
+                score=get_entity_score(entity),
+            )
+        )
 
     # Reverse to get items in original order (by start position)
     redacted_items.reverse()
@@ -123,10 +122,7 @@ def apply_redaction(
 
 
 def redact_text(
-    text: str,
-    language: str = "en",
-    entities_filter: list[str] | None = None,
-    mode: str = "mask"
+    text: str, language: str = "en", entities_filter: list[str] | None = None, mode: str = "mask"
 ) -> tuple[str, list[RedactedEntity]]:
     """Perform full redaction pipeline.
 
@@ -148,4 +144,3 @@ def redact_text(
 
     # Apply redaction
     return apply_redaction(text, filtered, mode)
-

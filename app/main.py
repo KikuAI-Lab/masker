@@ -123,6 +123,7 @@ app = FastAPI(
     ],
 )
 
+
 # Request ID middleware - add unique ID to each request for tracking
 class RequestIDMiddleware(BaseHTTPMiddleware):
     """Add unique request ID to each request for tracking and debugging."""
@@ -160,9 +161,14 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["X-Request-ID", "X-Processing-Time", "X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"],
+    expose_headers=[
+        "X-Request-ID",
+        "X-Processing-Time",
+        "X-RateLimit-Limit",
+        "X-RateLimit-Remaining",
+        "X-RateLimit-Reset",
+    ],
 )
-
 
 
 @app.middleware("http")
@@ -190,7 +196,7 @@ async def logging_middleware(request: Request, call_next):
         status_code=response.status_code,
         content_length=content_length,
         duration_ms=duration_ms,
-        request_id=request_id
+        request_id=request_id,
     )
 
     return response
@@ -206,7 +212,7 @@ async def size_limit_middleware(request: Request, call_next):
             status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             content={
                 "detail": f"Request body too large. Maximum allowed payload size is {settings.max_payload_size} bytes ({settings.max_payload_size // 1024}KB)."
-            }
+            },
         )
 
     return await call_next(request)
@@ -226,10 +232,7 @@ async def validation_exception_handler(_request: Request, exc: RequestValidation
     else:
         detail = "Validation error"
 
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content={"detail": detail}
-    )
+    return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"detail": detail})
 
 
 @app.exception_handler(Exception)
@@ -238,7 +241,7 @@ async def global_exception_handler(_request: Request, _exc: Exception):
     logger.exception("Unexpected error processing request")
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": "Internal server error"}
+        content={"detail": "Internal server error"},
     )
 
 
@@ -246,7 +249,7 @@ async def global_exception_handler(_request: Request, _exc: Exception):
     "/",
     tags=["Root"],
     summary="🏠 API root endpoint",
-    description="Redirects to interactive API documentation at `/docs`."
+    description="Redirects to interactive API documentation at `/docs`.",
 )
 async def root():
     """Redirect to API documentation."""
@@ -270,7 +273,7 @@ No authentication required. Returns service status and version.
   "version": "1.0.0"
 }
 ```
-"""
+""",
 )
 async def health_check() -> HealthResponse:
     """Check if the service is running."""
@@ -287,10 +290,7 @@ async def health_check() -> HealthResponse:
         status="ok",
         version=settings.api_version,
         uptime_seconds=round(uptime, 2),
-        components={
-            "pii_detector": detector_status,
-            "rate_limiter": "active"
-        }
+        components={"pii_detector": detector_status, "rate_limiter": "active"},
     )
 
 
@@ -299,14 +299,11 @@ async def health_check() -> HealthResponse:
     tags=["Monitoring"],
     summary="📊 Prometheus metrics",
     description="Prometheus-compatible metrics endpoint for monitoring and observability.",
-    include_in_schema=False  # Hide from main API docs
+    include_in_schema=False,  # Hide from main API docs
 )
 async def metrics():
     """Export Prometheus metrics."""
-    return Response(
-        content=generate_latest(),
-        media_type=CONTENT_TYPE_LATEST
-    )
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 # Include API v1 routes (canonical path)

@@ -48,9 +48,7 @@ def _build_path(current_path: str, key: Any) -> str:
 
 
 def process_json_recursive(
-    data: Any,
-    processor: Callable[[str], tuple[str, list]],
-    path: str = ""
+    data: Any, processor: Callable[[str], tuple[str, list]], path: str = ""
 ) -> tuple[Any, list[JsonFieldEntity]]:
     """Recursively process JSON, applying processor to string values.
 
@@ -88,10 +86,10 @@ def process_json_recursive(
         entities_with_path = [
             JsonFieldEntity(
                 path=path,
-                type=e.type if hasattr(e, 'type') else e.entity_type,
-                value=e.value if hasattr(e, 'value') else "",
+                type=e.type if hasattr(e, "type") else e.entity_type,
+                value=e.value if hasattr(e, "value") else "",
                 start=e.start,
-                end=e.end
+                end=e.end,
             )
             for e in raw_entities
         ]
@@ -103,9 +101,7 @@ def process_json_recursive(
 
 
 def detect_json(
-    data: Any,
-    language: str = "en",
-    entity_types: list[str] | None = None
+    data: Any, language: str = "en", entity_types: list[str] | None = None
 ) -> tuple[Any, list[JsonFieldEntity]]:
     """Detect PII in JSON structure without modifying it.
 
@@ -128,9 +124,7 @@ def detect_json(
 
 
 def mask_json(
-    data: Any,
-    language: str = "en",
-    entity_types: list[str] | None = None
+    data: Any, language: str = "en", entity_types: list[str] | None = None
 ) -> tuple[Any, list[JsonFieldEntity]]:
     """Mask PII in JSON structure with ***.
 
@@ -153,9 +147,7 @@ def mask_json(
 
 
 def redact_json(
-    data: Any,
-    language: str = "en",
-    entity_types: list[str] | None = None
+    data: Any, language: str = "en", entity_types: list[str] | None = None
 ) -> tuple[Any, list[JsonFieldEntity]]:
     """Redact PII in JSON structure with [REDACTED].
 
@@ -178,10 +170,7 @@ def redact_json(
 
 
 def process_json_with_mode(
-    data: Any,
-    language: str = "en",
-    mode: str = "mask",
-    entities_filter: list[str] | None = None
+    data: Any, language: str = "en", mode: str = "mask", entities_filter: list[str] | None = None
 ) -> tuple[Any, list[JsonFieldEntity]]:
     """Process JSON with specified mode and optional entity filtering.
 
@@ -220,15 +209,14 @@ def process_json_with_mode(
             result = text
             for entity in sorted_entities:
                 replacement = PLACEHOLDER_TEMPLATES.get(entity.type, f"<{entity.type}>")
-                result = result[:entity.start] + replacement + result[entity.end:]
+                result = result[: entity.start] + replacement + result[entity.end :]
             return result, detected
         else:
             # mask mode
             sorted_entities = sorted(detected, key=lambda e: e.start, reverse=True)
             result = text
             for entity in sorted_entities:
-                result = result[:entity.start] + MASK_TOKEN + result[entity.end:]
+                result = result[: entity.start] + MASK_TOKEN + result[entity.end :]
             return result, detected
 
     return process_json_recursive(copy.deepcopy(data), custom_processor)
-

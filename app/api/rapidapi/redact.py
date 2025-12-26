@@ -95,7 +95,7 @@ Filter which PII types to redact:
   "processing_time_ms": 15.29
 }
 ```
-"""
+""",
 )
 async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactResponse:
     """Redact PII entities in the provided text or JSON.
@@ -118,7 +118,7 @@ async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactRespo
             data=request.json,
             language=request.language,
             mode=request.mode,
-            entities_filter=entities_filter
+            entities_filter=entities_filter,
         )
 
         processing_time_ms = (time.perf_counter() - start_time) * 1000
@@ -129,7 +129,7 @@ async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactRespo
                 path=e.path,
                 start=e.start,
                 end=e.end,
-                score=1.0 if e.type in ("EMAIL", "PHONE", "CARD") else 0.85
+                score=1.0 if e.type in ("EMAIL", "PHONE", "CARD") else 0.85,
             )
             for e in json_entities
         ]
@@ -138,7 +138,7 @@ async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactRespo
             redacted_text=None,
             redacted_json=redacted_data,
             items=items,
-            processing_time_ms=round(processing_time_ms, 2)
+            processing_time_ms=round(processing_time_ms, 2),
         )
     else:
         # Text mode
@@ -146,7 +146,7 @@ async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactRespo
             text=request.text,
             language=request.language,
             entities_filter=entities_filter,
-            mode=request.mode
+            mode=request.mode,
         )
 
         processing_time_ms = (time.perf_counter() - start_time) * 1000
@@ -157,7 +157,7 @@ async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactRespo
                 path=None,
                 start=item.start,
                 end=item.end,
-                score=item.score
+                score=item.score,
             )
             for item in redacted_items
         ]
@@ -166,5 +166,5 @@ async def rapidapi_redact(request: RapidAPIRedactRequest) -> RapidAPIRedactRespo
             redacted_text=redacted_text_result,
             redacted_json=None,
             items=items,
-            processing_time_ms=round(processing_time_ms, 2)
+            processing_time_ms=round(processing_time_ms, 2),
         )

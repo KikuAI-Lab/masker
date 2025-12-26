@@ -23,9 +23,7 @@ class MaskedEntity:
 
 
 def apply_replacements(
-    text: str,
-    entities: Sequence[DetectedEntity],
-    replacement: str
+    text: str, entities: Sequence[DetectedEntity], replacement: str
 ) -> tuple[str, list[MaskedEntity]]:
     """Replace detected entities with the specified replacement string.
 
@@ -51,18 +49,20 @@ def apply_replacements(
 
     for entity in sorted_entities:
         # Append text before the entity
-        result_parts.append(text[last_end:entity.start])
+        result_parts.append(text[last_end : entity.start])
         # Append replacement
         result_parts.append(replacement)
 
         # Record the masked entity (with original positions)
-        masked_entities.append(MaskedEntity(
-            type=entity.type,
-            value=entity.value,
-            start=entity.start,
-            end=entity.end,
-            masked_value=replacement
-        ))
+        masked_entities.append(
+            MaskedEntity(
+                type=entity.type,
+                value=entity.value,
+                start=entity.start,
+                end=entity.end,
+                masked_value=replacement,
+            )
+        )
 
         last_end = entity.end
 
@@ -72,10 +72,7 @@ def apply_replacements(
     return "".join(result_parts), masked_entities
 
 
-def mask_text(
-    text: str,
-    entities: Sequence[DetectedEntity]
-) -> tuple[str, list[MaskedEntity]]:
+def mask_text(text: str, entities: Sequence[DetectedEntity]) -> tuple[str, list[MaskedEntity]]:
     """Mask detected entities with asterisks.
 
     Args:
@@ -88,10 +85,7 @@ def mask_text(
     return apply_replacements(text, entities, settings.mask_token)
 
 
-def redact_text(
-    text: str,
-    entities: Sequence[DetectedEntity]
-) -> tuple[str, list[MaskedEntity]]:
+def redact_text(text: str, entities: Sequence[DetectedEntity]) -> tuple[str, list[MaskedEntity]]:
     """Redact detected entities with [REDACTED] placeholder.
 
     Args:

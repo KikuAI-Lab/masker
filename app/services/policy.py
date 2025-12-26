@@ -16,11 +16,12 @@ from app.core.config import settings
 
 class RedactionAction(str, Enum):
     """Possible actions for a PII category."""
-    MASK = "mask"           # Replace with ***
+
+    MASK = "mask"  # Replace with ***
     PLACEHOLDER = "placeholder"  # Replace with <TYPE>
-    HASH = "hash"           # Replace with SHA256 hash prefix
-    DROP = "drop"           # Remove entirely
-    KEEP = "keep"           # Do not redact
+    HASH = "hash"  # Replace with SHA256 hash prefix
+    DROP = "drop"  # Remove entirely
+    KEEP = "keep"  # Do not redact
 
 
 @dataclass

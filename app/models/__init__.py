@@ -1,2 +1,1 @@
 """Models module - Pydantic schemas."""
-

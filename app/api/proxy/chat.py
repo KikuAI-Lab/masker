@@ -97,11 +97,11 @@ def _redact_message_content(
         entities_by_type[item.entity_type] += 1
 
         replacement = _apply_redaction_action(
-            content[item.start:item.end],
+            content[item.start : item.end],
             item.entity_type,
             action,
         )
-        result = result[:item.start] + replacement + result[item.end:]
+        result = result[: item.start] + replacement + result[item.end :]
 
     return result, dict(entities_by_type)
 

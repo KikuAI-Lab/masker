@@ -36,11 +36,9 @@ class PIIDetector:
 
     # Regex patterns for PII detection
     PATTERNS = {
-        "EMAIL": re.compile(
-            r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-        ),
+        "EMAIL": re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"),
         "PHONE": re.compile(
-            r'''
+            r"""
             (?:
                 # International format: +1, +7, +44, etc.
                 \+\d{1,3}[-.\s]?
@@ -54,11 +52,11 @@ class PIIDetector:
             )?
             # Main number parts
             \d{2,4}[-.\s]?\d{2,4}[-.\s]?\d{2,4}
-            ''',
-            re.VERBOSE
+            """,
+            re.VERBOSE,
         ),
         "CARD": re.compile(
-            r'''
+            r"""
             (?<!\d)  # Not preceded by digit
             (?:
                 # Standard 16-digit card with optional separators
@@ -68,8 +66,8 @@ class PIIDetector:
                 \d{4}[-\s]?\d{6}[-\s]?\d{5}
             )
             (?!\d)  # Not followed by digit
-            ''',
-            re.VERBOSE
+            """,
+            re.VERBOSE,
         ),
     }
 
@@ -114,18 +112,17 @@ class PIIDetector:
 
                 # Filter out phone matches that are too short or too long
                 if entity_type == "PHONE":
-                    digits_only = re.sub(r'\D', '', value)
+                    digits_only = re.sub(r"\D", "", value)
                     if len(digits_only) < self.MIN_PHONE_LENGTH:
                         continue
                     if len(digits_only) > self.MAX_PHONE_LENGTH:
                         continue
 
-                entities.append(DetectedEntity(
-                    type=entity_type,
-                    value=value,
-                    start=match.start(),
-                    end=match.end()
-                ))
+                entities.append(
+                    DetectedEntity(
+                        type=entity_type, value=value, start=match.start(), end=match.end()
+                    )
+                )
 
         return entities
 
@@ -149,12 +146,11 @@ class PIIDetector:
         for ent in doc.ents:
             # Map spaCy entity labels to our types
             if ent.label_ in ("PERSON", "PER"):
-                entities.append(DetectedEntity(
-                    type="PERSON",
-                    value=ent.text,
-                    start=ent.start_char,
-                    end=ent.end_char
-                ))
+                entities.append(
+                    DetectedEntity(
+                        type="PERSON", value=ent.text, start=ent.start_char, end=ent.end_char
+                    )
+                )
 
         return entities
 
@@ -176,10 +172,7 @@ class PIIDetector:
         # Sort by start position, then by priority (more specific types first)
         # CARD has higher priority than PHONE to avoid card numbers being detected as phones
         priority = {"EMAIL": 0, "CARD": 1, "PHONE": 2, "PERSON": 3}
-        sorted_entities = sorted(
-            entities,
-            key=lambda e: (e.start, priority.get(e.type, 99))
-        )
+        sorted_entities = sorted(entities, key=lambda e: (e.start, priority.get(e.type, 99)))
 
         result = []
         last_end = -1
@@ -194,7 +187,9 @@ class PIIDetector:
 
         return result
 
-    def detect(self, text: str, language: str = "en", entity_types: list[str] | None = None) -> list[DetectedEntity]:
+    def detect(
+        self, text: str, language: str = "en", entity_types: list[str] | None = None
+    ) -> list[DetectedEntity]:
         """Detect all PII entities in the text.
 
         Args:
@@ -238,4 +233,3 @@ def get_detector() -> PIIDetector:
     if _detector is None:
         _detector = PIIDetector()
     return _detector
-

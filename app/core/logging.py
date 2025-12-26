@@ -18,8 +18,7 @@ def setup_logging() -> logging.Logger:
         handler.setLevel(logging.INFO)
 
         formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S"
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
         )
         handler.setFormatter(formatter)
         logger.addHandler(handler)
@@ -35,7 +34,7 @@ def log_request(
     status_code: int,
     content_length: int,
     duration_ms: float,
-    request_id: str | None = None
+    request_id: str | None = None,
 ) -> None:
     """Log request metadata safely without exposing content.
 
@@ -56,7 +55,7 @@ def log_request(
             status_code,
             content_length,
             duration_ms,
-            request_id
+            request_id,
         )
     else:
         logger.info(
@@ -65,7 +64,7 @@ def log_request(
             path,
             status_code,
             content_length,
-            duration_ms
+            duration_ms,
         )
 
 
@@ -94,4 +93,3 @@ def sanitize_for_logging(data: dict[str, Any]) -> dict[str, Any]:
 
 # Global logger instance
 logger = setup_logging()
-
