@@ -1,6 +1,5 @@
 """Tests for API key validation service."""
 
-
 from app.services.api_keys import APIKeyService, reset_api_key_service
 
 

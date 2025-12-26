@@ -1,5 +1,6 @@
 """Tests for JSON mode in all endpoints."""
 
+import pytest
 from fastapi.testclient import TestClient
 
 
@@ -163,9 +164,6 @@ class TestJsonModeRedact:
         data = response.json()
 
         assert data["json"]["payment"]["card_number"] == "[REDACTED]"
-
-
-import pytest
 
 
 @pytest.mark.skip(reason="RapidAPI endpoint is shadowed by V1 router in app/main.py")
