@@ -6,7 +6,7 @@ Only metadata and statistics are logged.
 
 import json
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -54,7 +54,7 @@ class AuditLogger:
 
     def _get_log_path(self) -> Path:
         """Get the path for today's log file."""
-        date_str = datetime.now(datetime.UTC).strftime("%Y-%m-%d")
+        date_str = datetime.now(UTC).strftime("%Y-%m-%d")
         return self._audit_dir / f"{date_str}.jsonl"
 
     def log(self, entry: AuditEntry) -> None:
@@ -103,7 +103,7 @@ class AuditLogger:
         """
         entry = AuditEntry(
             request_id=request_id,
-            timestamp=datetime.now(datetime.UTC).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             tenant_id=tenant_id,
             endpoint=endpoint,
             entities_total=sum(entities_by_type.values()),

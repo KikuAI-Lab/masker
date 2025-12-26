@@ -23,19 +23,14 @@ class TestErrorHandling:
     def test_invalid_json(self, client: TestClient):
         """Should return 400 for invalid JSON."""
         response = client.post(
-            "/api/v1/detect",
-            content="not valid json",
-            headers={"Content-Type": "application/json"}
+            "/api/v1/detect", content="not valid json", headers={"Content-Type": "application/json"}
         )
 
         assert response.status_code in (400, 422)
 
     def test_invalid_language(self, client: TestClient):
         """Should reject invalid language codes."""
-        response = client.post(
-            "/api/v1/detect",
-            json={"text": "Hello", "language": "invalid"}
-        )
+        response = client.post("/api/v1/detect", json={"text": "Hello", "language": "invalid"})
 
         assert response.status_code == 400
 
@@ -44,20 +39,14 @@ class TestErrorHandling:
         # Create text larger than 32KB
         long_text = "a" * (33 * 1024)
 
-        response = client.post(
-            "/api/v1/detect",
-            json={"text": long_text}
-        )
+        response = client.post("/api/v1/detect", json={"text": long_text})
 
         # Should be rejected (either by middleware or validation)
         assert response.status_code in (400, 413)
 
     def test_missing_content_type(self, client: TestClient):
         """Should handle missing content type gracefully."""
-        response = client.post(
-            "/api/v1/detect",
-            content='{"text": "hello"}'
-        )
+        response = client.post("/api/v1/detect", content='{"text": "hello"}')
 
         # FastAPI should handle this
         assert response.status_code in (200, 400, 422)
@@ -67,4 +56,3 @@ class TestErrorHandling:
         response = client.get("/api/v1/unknown")
 
         assert response.status_code == 404
-

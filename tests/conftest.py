@@ -22,6 +22,5 @@ def reset_rate_limit():
 
     # Reset global bucket
     RateLimitMiddleware._global_bucket = TokenBucket(
-        RateLimitMiddleware.GLOBAL_CAPACITY,
-        RateLimitMiddleware.GLOBAL_REFILL_RATE
+        RateLimitMiddleware.GLOBAL_CAPACITY, RateLimitMiddleware.GLOBAL_REFILL_RATE
     )

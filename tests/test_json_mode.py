@@ -9,13 +9,7 @@ class TestJsonModeDetect:
     def test_detect_json_simple(self, client: TestClient):
         """Should detect PII in simple JSON object."""
         response = client.post(
-            "/api/v1/detect",
-            json={
-                "json": {
-                    "email": "john@example.com",
-                    "name": "John Doe"
-                }
-            }
+            "/api/v1/detect", json={"json": {"email": "john@example.com", "name": "John Doe"}}
         )
 
         assert response.status_code == 200
@@ -35,14 +29,9 @@ class TestJsonModeDetect:
             "/api/v1/detect",
             json={
                 "json": {
-                    "user": {
-                        "profile": {
-                            "email": "test@example.com",
-                            "phone": "+1-555-123-4567"
-                        }
-                    }
+                    "user": {"profile": {"email": "test@example.com", "phone": "+1-555-123-4567"}}
                 }
-            }
+            },
         )
 
         assert response.status_code == 200
@@ -56,14 +45,7 @@ class TestJsonModeDetect:
         """Should detect PII in JSON arrays."""
         response = client.post(
             "/api/v1/detect",
-            json={
-                "json": {
-                    "contacts": [
-                        {"email": "a@b.com"},
-                        {"email": "c@d.com"}
-                    ]
-                }
-            }
+            json={"json": {"contacts": [{"email": "a@b.com"}, {"email": "c@d.com"}]}},
         )
 
         assert response.status_code == 200
@@ -80,14 +62,7 @@ class TestJsonModeDetect:
         """Should not process non-string values."""
         response = client.post(
             "/api/v1/detect",
-            json={
-                "json": {
-                    "count": 42,
-                    "active": True,
-                    "data": None,
-                    "email": "test@example.com"
-                }
-            }
+            json={"json": {"count": 42, "active": True, "data": None, "email": "test@example.com"}},
         )
 
         assert response.status_code == 200
@@ -105,13 +80,7 @@ class TestJsonModeMask:
     def test_mask_json_simple(self, client: TestClient):
         """Should mask PII in simple JSON."""
         response = client.post(
-            "/api/v1/mask",
-            json={
-                "json": {
-                    "email": "john@example.com",
-                    "message": "Hello world"
-                }
-            }
+            "/api/v1/mask", json={"json": {"email": "john@example.com", "message": "Hello world"}}
         )
 
         assert response.status_code == 200
@@ -125,16 +94,7 @@ class TestJsonModeMask:
         """Should mask PII in nested JSON."""
         response = client.post(
             "/api/v1/mask",
-            json={
-                "json": {
-                    "user": {
-                        "name": "John Doe",
-                        "contact": {
-                            "email": "john@example.com"
-                        }
-                    }
-                }
-            }
+            json={"json": {"user": {"name": "John Doe", "contact": {"email": "john@example.com"}}}},
         )
 
         assert response.status_code == 200
@@ -149,14 +109,7 @@ class TestJsonModeMask:
 
     def test_mask_json_array(self, client: TestClient):
         """Should mask PII in arrays."""
-        response = client.post(
-            "/api/v1/mask",
-            json={
-                "json": {
-                    "emails": ["a@b.com", "c@d.com"]
-                }
-            }
-        )
+        response = client.post("/api/v1/mask", json={"json": {"emails": ["a@b.com", "c@d.com"]}})
 
         assert response.status_code == 200
         data = response.json()
@@ -171,13 +124,10 @@ class TestJsonModeMask:
             "boolean": True,
             "null": None,
             "array": [1, 2, 3],
-            "nested": {"key": "value"}
+            "nested": {"key": "value"},
         }
 
-        response = client.post(
-            "/api/v1/mask",
-            json={"json": original}
-        )
+        response = client.post("/api/v1/mask", json={"json": original})
 
         assert response.status_code == 200
         data = response.json()
@@ -196,14 +146,7 @@ class TestJsonModeRedact:
 
     def test_redact_json_simple(self, client: TestClient):
         """Should redact PII in simple JSON."""
-        response = client.post(
-            "/api/v1/redact",
-            json={
-                "json": {
-                    "card": "4111-1111-1111-1111"
-                }
-            }
-        )
+        response = client.post("/api/v1/redact", json={"json": {"card": "4111-1111-1111-1111"}})
 
         assert response.status_code == 200
         data = response.json()
@@ -213,14 +156,7 @@ class TestJsonModeRedact:
     def test_redact_json_nested(self, client: TestClient):
         """Should redact PII in nested JSON."""
         response = client.post(
-            "/api/v1/redact",
-            json={
-                "json": {
-                    "payment": {
-                        "card_number": "5500 0000 0000 0004"
-                    }
-                }
-            }
+            "/api/v1/redact", json={"json": {"payment": {"card_number": "5500 0000 0000 0004"}}}
         )
 
         assert response.status_code == 200
@@ -231,6 +167,7 @@ class TestJsonModeRedact:
 
 import pytest
 
+
 @pytest.mark.skip(reason="RapidAPI endpoint is shadowed by V1 router in app/main.py")
 class TestJsonModeRapidAPI:
     """Tests for /v1/redact RapidAPI endpoint with JSON input."""
@@ -238,13 +175,7 @@ class TestJsonModeRapidAPI:
     def test_rapidapi_json_mask_mode(self, client: TestClient):
         """Should mask PII in JSON with mask mode."""
         response = client.post(
-            "/v1/redact",
-            json={
-                "json": {
-                    "user": {"email": "test@example.com"}
-                },
-                "mode": "mask"
-            }
+            "/v1/redact", json={"json": {"user": {"email": "test@example.com"}}, "mode": "mask"}
         )
 
         assert response.status_code == 200
@@ -257,13 +188,7 @@ class TestJsonModeRapidAPI:
     def test_rapidapi_json_placeholder_mode(self, client: TestClient):
         """Should use placeholders in JSON."""
         response = client.post(
-            "/v1/redact",
-            json={
-                "json": {
-                    "email": "test@example.com"
-                },
-                "mode": "placeholder"
-            }
+            "/v1/redact", json={"json": {"email": "test@example.com"}, "mode": "placeholder"}
         )
 
         assert response.status_code == 200
@@ -276,13 +201,10 @@ class TestJsonModeRapidAPI:
         response = client.post(
             "/v1/redact",
             json={
-                "json": {
-                    "email": "test@example.com",
-                    "phone": "+1-555-123-4567"
-                },
+                "json": {"email": "test@example.com", "phone": "+1-555-123-4567"},
                 "entities": ["EMAIL"],
-                "mode": "mask"
-            }
+                "mode": "mask",
+            },
         )
 
         assert response.status_code == 200
@@ -295,14 +217,7 @@ class TestJsonModeRapidAPI:
 
     def test_rapidapi_json_items_have_path(self, client: TestClient):
         """Should include JSON path in items."""
-        response = client.post(
-            "/v1/redact",
-            json={
-                "json": {
-                    "user": {"email": "test@example.com"}
-                }
-            }
-        )
+        response = client.post("/v1/redact", json={"json": {"user": {"email": "test@example.com"}}})
 
         assert response.status_code == 200
         data = response.json()
@@ -316,31 +231,19 @@ class TestJsonModeValidation:
 
     def test_cannot_provide_both_text_and_json(self, client: TestClient):
         """Should reject when both text and json provided."""
-        response = client.post(
-            "/api/v1/detect",
-            json={
-                "text": "Hello",
-                "json": {"key": "value"}
-            }
-        )
+        response = client.post("/api/v1/detect", json={"text": "Hello", "json": {"key": "value"}})
 
         assert response.status_code == 400
 
     def test_must_provide_text_or_json(self, client: TestClient):
         """Should reject when neither text nor json provided."""
-        response = client.post(
-            "/api/v1/detect",
-            json={"language": "en"}
-        )
+        response = client.post("/api/v1/detect", json={"language": "en"})
 
         assert response.status_code == 400
 
     def test_text_mode_still_works(self, client: TestClient):
         """Should still support text-only mode."""
-        response = client.post(
-            "/api/v1/mask",
-            json={"text": "Email: test@example.com"}
-        )
+        response = client.post("/api/v1/mask", json={"text": "Email: test@example.com"})
 
         assert response.status_code == 200
         data = response.json()
@@ -358,17 +261,9 @@ class TestJsonModeComplexStructures:
             "/api/v1/mask",
             json={
                 "json": {
-                    "level1": {
-                        "level2": {
-                            "level3": {
-                                "level4": {
-                                    "email": "deep@example.com"
-                                }
-                            }
-                        }
-                    }
+                    "level1": {"level2": {"level3": {"level4": {"email": "deep@example.com"}}}}
                 }
-            }
+            },
         )
 
         assert response.status_code == 200
@@ -384,10 +279,10 @@ class TestJsonModeComplexStructures:
                 "json": {
                     "users": [
                         {"name": "John Doe", "emails": ["john@a.com", "john@b.com"]},
-                        {"name": "Jane Smith", "emails": ["jane@c.com"]}
+                        {"name": "Jane Smith", "emails": ["jane@c.com"]},
                     ]
                 }
-            }
+            },
         )
 
         assert response.status_code == 200
@@ -402,13 +297,7 @@ class TestJsonModeComplexStructures:
         """Should handle empty structures."""
         response = client.post(
             "/api/v1/mask",
-            json={
-                "json": {
-                    "empty_object": {},
-                    "empty_array": [],
-                    "null_value": None
-                }
-            }
+            json={"json": {"empty_object": {}, "empty_array": [], "null_value": None}},
         )
 
         assert response.status_code == 200
@@ -422,11 +311,7 @@ class TestJsonModeComplexStructures:
         """Should handle multiple PII in same string field."""
         response = client.post(
             "/api/v1/mask",
-            json={
-                "json": {
-                    "message": "Contact john@example.com or jane@example.com"
-                }
-            }
+            json={"json": {"message": "Contact john@example.com or jane@example.com"}},
         )
 
         assert response.status_code == 200
@@ -436,4 +321,3 @@ class TestJsonModeComplexStructures:
         assert "john@example.com" not in data["json"]["message"]
         assert "jane@example.com" not in data["json"]["message"]
         assert "***" in data["json"]["message"]
-
