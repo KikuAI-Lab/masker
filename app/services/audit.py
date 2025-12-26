@@ -5,11 +5,10 @@ Only metadata and statistics are logged.
 """
 
 import json
-# import os  # unused
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-from dataclasses import dataclass, asdict
 
 from app.core.config import settings
 
