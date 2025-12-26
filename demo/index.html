@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masker API | Privacy for LLMs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+    <div class="glow-cursor"></div>
+
+    <nav>
+        <div class="logo">MASKER<span class="dot">.</span></div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#demo">Live Demo</a>
+            <a href="#docs">Docs</a>
+            <a href="https://rapidapi.com" class="btn-primary">Get API Key</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1 class="glitch-text" data-text="Protect Your Data">Protect Your Data</h1>
+            <h1 class="sub-glitch">Before It Reaches AI</h1>
+            <p class="hero-desc">
+                The ultimate PII redaction layer for LLMs. 
+                Stateless. Fast. Secure.
+            </p>
+            <div class="hero-btns">
+                <a href="#demo" class="btn-primary">Try Live Demo</a>
+                <a href="https://github.com/KikuAI-Lab/masker" class="btn-secondary">GitHub</a>
+            </div>
+        </div>
+        
+        <div class="visual-metaphor">
+            <div class="stream-container">
+                <div class="stream-line" id="stream-input">
+                    <span class="token">Hello</span>
+                    <span class="token">my</span>
+                    <span class="token">email</span>
+                    <span class="token">is</span>
+                    <span class="token pii-source">john@doe.com</span>
+                </div>
+                <div class="scanner-beam"></div>
+                <div class="stream-line" id="stream-output">
+                    <span class="token">Hello</span>
+                    <span class="token">my</span>
+                    <span class="token">email</span>
+                    <span class="token">is</span>
+                    <span class="token pii-masked">***</span>
+                </div>
+            </div>
+            <div class="status-badge">
+                <span class="indicator"></span> SYSTEM ACTIVE
+            </div>
+        </div>
+    </header>
+
+    <section id="demo" class="interactive-demo">
+        <div class="container">
+            <h2>Interactive Console</h2>
+            <p>Type anything. We'll find the secrets.</p>
+            
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <div class="dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="title">masker_cli — v1.0.0</div>
+                </div>
+                <div class="terminal-body">
+                    <div class="input-area">
+                        <span class="prompt">></span>
+                        <textarea id="demo-input" placeholder="Paste text with emails, phones, or names here..."></textarea>
+                    </div>
+                    <div class="output-area">
+                        <div class="processing-line hidden">Scanning...</div>
+                        <div id="demo-output" class="result-text"></div>
+                        <div id="demo-stats" class="stats-row"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="container">
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">🔒</div>
+                    <h3>Privacy First</h3>
+                    <p>Stateless processing. No database. No logs. Your data never touches a disk.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚡</div>
+                    <h3>Ultra Fast</h3>
+                    <p>Optimized regex & lightweight NLP. Sub-20ms latency for real-time streams.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🌍</div>
+                    <h3>Multi-Language</h3>
+                    <p>Native support for English and Russian entity recognition out of the box.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">MASKER</div>
+                <p>Built by KikuAI Lab. Open Source.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
