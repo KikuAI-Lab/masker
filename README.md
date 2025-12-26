@@ -1,6 +1,8 @@
-<img width="512" height="512" alt="image" src="https://github.com/user-attachments/assets/fe7b47e8-6989-4161-8b17-5d77d1312fa4" />
-
-# Masker
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/fe7b47e8-6989-4161-8b17-5d77d1312fa4" alt="image" width="120" height="120">
+  
+  # Masker
+</div>
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg)](https://fastapi.tiangolo.com)
