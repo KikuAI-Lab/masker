@@ -1,0 +1,42 @@
+services:
+  masker-api:
+    build: .
+    ports:
+      - "8004:8000"
+    environment:
+      # Proxy settings
+      - MASKER_UPSTREAM_URL=${MASKER_UPSTREAM_URL:-https://api.openai.com/v1/chat/completions}
+      - MASKER_UPSTREAM_TIMEOUT=60
+      # API Keys (internal - for kikuai-bot proxy)
+      - MASKER_API_KEYS=${MASKER_API_KEYS:-}
+      # Policy
+      - MASKER_POLICIES_DIR=/app/policies
+      - MASKER_DEFAULT_POLICY_ID=default
+      - MASKER_DEFAULT_FAIL_MODE=closed
+      # Audit (disabled in prod by default - logs to stdout)
+      - MASKER_AUDIT_ENABLED=${MASKER_AUDIT_ENABLED:-false}
+      - MASKER_AUDIT_DIR=/app/audit
+    volumes:
+      - ./policies:/app/policies:ro
+      - masker_audit:/app/audit
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  masker_audit:
