@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: 'KikuAI'
+    orgId: 1
+    folder: 'KikuAI'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json
