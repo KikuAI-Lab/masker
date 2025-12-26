@@ -1,0 +1,209 @@
+openapi: 3.1.0
+info:
+  title: Masker API
+  description: |
+    PII Redaction & Text Anonymization API.
+    
+    Masker automatically detects and masks sensitive entities (emails, phones, credit cards, names) 
+    in both plain text and JSON structures.
+    
+    **Use Cases:**
+    - Clean data before sending to LLMs (ChatGPT, Claude)
+    - Anonymize logs and analytics data
+    - GDPR/CCPA compliance automation
+    
+    **Supported PII Types:**
+    - `EMAIL` - Email addresses
+    - `PHONE` - Phone numbers (international)
+    - `CARD` - Credit/debit card numbers
+    - `PERSON` - Person names (via NER)
+  version: 1.0.0
+  contact:
+    name: KikuAI Support
+    email: support@kikuai.dev
+    url: https://kikuai.dev
+  license:
+    name: AGPL-3.0
+    url: https://www.gnu.org/licenses/agpl-3.0.html
+
+servers:
+  - url: https://masker-api.p.rapidapi.com
+    description: RapidAPI Production
+
+security:
+  - RapidAPIKey: []
+
+paths:
+  /v1/redact:
+    post:
+      operationId: redactPII
+      summary: Redact PII from text or JSON
+      description: |
+        Detects and redacts personally identifiable information from text or JSON input.
+        
+        **Modes:**
+        - `mask` - Replace with `***`
+        - `placeholder` - Replace with `<EMAIL>`, `<PHONE>`, etc.
+        - `redact` - Replace with `[REDACTED]`
+        
+        **Languages:**
+        - `en` - English (default)
+        - `ru` - Russian
+      tags:
+        - PII Redaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedactRequest'
+            examples:
+              text_mask:
+                summary: Mask text
+                value:
+                  text: "Contact john@example.com or call +1-555-123-4567"
+                  mode: "mask"
+              text_placeholder:
+                summary: Placeholder mode
+                value:
+                  text: "Hi John Doe, your email is john@doe.com"
+                  mode: "placeholder"
+              json_mode:
+                summary: JSON redaction
+                value:
+                  json:
+                    user:
+                      email: "test@example.com"
+                      phone: "+1-555-123-4567"
+                  mode: "mask"
+      responses:
+        '200':
+          description: Successful redaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedactResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health check
+      description: Returns service status and uptime.
+      tags:
+        - System
+      security: []
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    RapidAPIKey:
+      type: apiKey
+      in: header
+      name: X-RapidAPI-Key
+      description: Your RapidAPI key
+
+  schemas:
+    RedactRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Plain text to redact
+          example: "Contact john@example.com"
+        json:
+          type: object
+          description: JSON object to redact (alternative to text)
+          additionalProperties: true
+        mode:
+          type: string
+          enum: [mask, placeholder, redact]
+          default: mask
+          description: Redaction mode
+        language:
+          type: string
+          enum: [en, ru]
+          default: en
+          description: Language for NER detection
+        entities:
+          type: array
+          items:
+            type: string
+            enum: [EMAIL, PHONE, CARD, PERSON]
+          description: Entity types to redact (default: all)
+      oneOf:
+        - required: [text]
+        - required: [json]
+
+    RedactResponse:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Redacted text (if text input)
+        json:
+          type: object
+          description: Redacted JSON (if JSON input)
+          additionalProperties: true
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetectedEntity'
+          description: List of detected entities
+        processing_time_ms:
+          type: number
+          description: Processing time in milliseconds
+
+    DetectedEntity:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [EMAIL, PHONE, CARD, PERSON]
+        original:
+          type: string
+          description: Original value (masked for security)
+        redacted:
+          type: string
+          description: Redacted value
+        start:
+          type: integer
+          description: Start position in text
+        end:
+          type: integer
+          description: End position in text
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "healthy"
+        uptime_seconds:
+          type: integer
+        version:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Error message

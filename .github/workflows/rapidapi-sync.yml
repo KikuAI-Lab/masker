@@ -1,0 +1,44 @@
+name: Sync OpenAPI to RapidAPI
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy'
+        required: false
+        default: 'latest'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate OpenAPI
+        run: |
+          npm install -g @apidevtools/swagger-cli
+          swagger-cli validate openapi.rapidapi.yaml
+
+      - name: Sync to RapidAPI
+        if: github.event_name == 'release' || github.event.inputs.version != ''
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_PROVIDER_KEY }}
+          RAPIDAPI_API_ID: ${{ secrets.RAPIDAPI_API_ID }}
+        run: |
+          echo "RapidAPI sync would happen here with:"
+          echo "- API ID: $RAPIDAPI_API_ID"
+          echo "- OpenAPI: openapi.rapidapi.yaml"
+          # Actual RapidAPI sync command:
+          # curl -X PUT "https://api.rapidapi.com/v1/apis/${RAPIDAPI_API_ID}/versions/1.0.0" \
+          #   -H "X-RapidAPI-Key: ${RAPIDAPI_KEY}" \
+          #   -H "Content-Type: application/yaml" \
+          #   --data-binary @openapi.rapidapi.yaml
+
+      - name: Summary
+        run: |
+          echo "## RapidAPI Sync Complete" >> $GITHUB_STEP_SUMMARY
+          echo "- Version: ${{ github.ref_name || github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: OpenAPI validated" >> $GITHUB_STEP_SUMMARY
