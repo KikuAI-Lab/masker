@@ -99,11 +99,17 @@ See [.env.example](.env.example) for all options.
 | `GET /health` | Health check |
 | `GET /metrics` | Prometheus metrics |
 
-## Privacy
+## Security & Architecture
+<br>
 
-- **No storage** — all processing in-memory
-- **No logging** — only metadata logged
-- **Stateless** — each request independent
+> **Stateless by Design.**
+> Masker is a firewall, not a storage bucket.
+
+*   ✅ **Zero Data Retention** — Payloads are processed in RAM and forgotten instantly.
+*   ✅ **Local Intelligence** — No 3rd party API calls. All ML runs on your CPU.
+*   ✅ **Air-Gapped Logic** — Container requires no internet access to function.
+
+📖 Read about our **[Stateless Architecture](docs/STATELESS_ARCHITECTURE.md)** to understand how we guarantee data privacy.
 
 ## License
 
