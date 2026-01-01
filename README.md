@@ -117,4 +117,4 @@ See [.env.example](.env.example) for all options.
 
 ## License
 
-AGPL-3.0 — [KikuAI Lab](https://kikuai.dev)
+AGPL-3.0 — [KikuAI OÜ](https://kikuai.dev)

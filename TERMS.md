@@ -18,4 +18,4 @@ Access to the API is subject to rate limiting and payload size restrictions as d
 The service is provided "as is" without any warranties of any kind.
 
 ## 6. Limitation of Liability
-KikuAI Lab shall not be liable for any indirect, incidental, or consequential damages.
+KikuAI OÜ shall not be liable for any indirect, incidental, or consequential damages.
