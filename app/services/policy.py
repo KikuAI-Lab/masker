@@ -5,7 +5,7 @@ Loads and applies redaction policies from YAML configuration files.
 
 # import os  # unused
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Literal
 
@@ -14,7 +14,7 @@ import yaml
 from app.core.config import settings
 
 
-class RedactionAction(str, Enum):
+class RedactionAction(StrEnum):
     """Possible actions for a PII category."""
 
     MASK = "mask"  # Replace with ***
