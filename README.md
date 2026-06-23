@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://github.com/user-attachments/assets/fe7b47e8-6989-4161-8b17-5d77d1312fa4" alt="image" width="120" height="120">
   
-  # Masker
+  <h1 align="center">Masker</h1>
 </div>
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -11,6 +11,10 @@
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED.svg)](Dockerfile)
 
 **PII redaction API for LLMs.** Remove personal data before sending to ChatGPT, Claude, or any AI.
+
+**[Run locally](#quick-start)**
+
+[Docs](#llm-proxy-openai-compatible) · [Examples](#what-it-does) · [API quickstart](#quick-start)
 
 ## What it does
 
