@@ -109,11 +109,11 @@ See [.env.example](.env.example) for all options.
 > **Stateless by Design.**
 > Masker is a firewall, not a storage bucket.
 
-*   ✅ **Zero Data Retention** — Payloads are processed in RAM and forgotten instantly.
-*   ✅ **Local Intelligence** — No 3rd party API calls. All ML runs on your CPU.
-*   ✅ **Air-Gapped Logic** — Container requires no internet access to function.
+*   ✅ **No raw payload storage by design** — Payloads are processed in RAM and are not intentionally persisted.
+*   ✅ **Local PII detection path** — Redaction logic does not require third-party AI calls.
+*   ✅ **Self-hostable boundary** — The redaction service can run without internet access; proxy mode still calls the configured upstream provider.
 
-📖 Read about our **[Stateless Architecture](docs/STATELESS_ARCHITECTURE.md)** to understand how we guarantee data privacy.
+📖 Read about our **[Stateless Architecture](docs/STATELESS_ARCHITECTURE.md)** to understand the intended privacy boundary and deployment assumptions.
 
 ## License
 
