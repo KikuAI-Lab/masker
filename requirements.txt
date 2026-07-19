@@ -12,5 +12,5 @@ pytest-cov>=4.1.0
 httpx>=0.26.0
 
 # Development
-ruff>=0.1.0
+ruff>=0.15.22
 mypy>=1.8.0
