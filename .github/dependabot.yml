@@ -22,7 +22,9 @@ updates:
       day: monday
       time: "05:00"
       timezone: Europe/Kyiv
-    open-pull-requests-limit: 5
+    # This application currently has no lock file. Updating lower bounds does
+    # not change installed versions, while security update PRs still work.
+    open-pull-requests-limit: 0
     groups:
       compatible-updates:
         patterns:
@@ -38,7 +40,9 @@ updates:
       day: monday
       time: "05:00"
       timezone: Europe/Kyiv
-    open-pull-requests-limit: 5
+    # Keep the container on the repository's declared Python support line.
+    # Security update PRs remain enabled.
+    open-pull-requests-limit: 0
     groups:
       compatible-updates:
         patterns:
