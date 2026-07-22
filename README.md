@@ -12,6 +12,7 @@
 
 **PII redaction API for LLMs.** Remove personal data before sending to ChatGPT, Claude, or any AI.
 
+**[Open the project site](https://kikuai-lab.github.io/masker/)** ·
 **[Run locally](#quick-start)**
 
 [Docs](#llm-proxy-openai-compatible) · [Examples](#what-it-does) · [API quickstart](#quick-start)
@@ -118,6 +119,12 @@ See [.env.example](.env.example) for all options.
 *   ✅ **Self-hostable boundary** — The redaction service can run without internet access; proxy mode still calls the configured upstream provider.
 
 📖 Read about our **[Stateless Architecture](docs/STATELESS_ARCHITECTURE.md)** to understand the intended privacy boundary and deployment assumptions.
+
+## Follow the work
+
+Project notes and new tools: [Telegram](https://t.me/kiku_ai) ·
+[LinkedIn](https://www.linkedin.com/in/kiku-jw/) ·
+[KikuAI](https://kikuai.dev/)
 
 ## License
 
