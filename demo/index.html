@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masker API | Privacy for LLMs</title>
+    <meta name="description" content="Preview client-side regex masking for email addresses, phone numbers, and card-like numbers before sharing text with AI tools.">
+    <link rel="canonical" href="https://kikuai-lab.github.io/masker/">
+    <title>Masker | Client-side PII masking preview</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -20,18 +22,18 @@
         <div class="nav-links">
             <a href="#features">Features</a>
             <a href="#demo">Live Demo</a>
-            <a href="#docs">Docs</a>
-            <a href="https://rapidapi.com" class="btn-primary">Get API Key</a>
+            <a href="https://github.com/KikuAI-Lab/masker#documentation">Docs</a>
+            <a href="https://github.com/KikuAI-Lab/masker#quick-start" class="btn-primary">Run locally</a>
         </div>
     </nav>
 
     <header class="hero">
         <div class="hero-content">
             <h1 class="glitch-text" data-text="Protect Your Data">Protect Your Data</h1>
-            <h1 class="sub-glitch">Before It Reaches AI</h1>
+            <p class="sub-glitch">Before It Reaches AI</p>
             <p class="hero-desc">
-                The ultimate PII redaction layer for LLMs. 
-                Stateless. Fast. Secure.
+                Preview local regex masking for common identifiers before sharing text with AI tools.
+                This browser demo is not the full Masker API.
             </p>
             <div class="hero-btns">
                 <a href="#demo" class="btn-primary">Try Live Demo</a>
@@ -58,7 +60,7 @@
                 </div>
             </div>
             <div class="status-badge">
-                <span class="indicator"></span> SYSTEM ACTIVE
+                <span class="indicator"></span> CLIENT-SIDE PREVIEW
             </div>
         </div>
     </header>
@@ -66,19 +68,19 @@
     <section id="demo" class="interactive-demo">
         <div class="container">
             <h2>Interactive Console</h2>
-            <p>Type anything. We'll find the secrets.</p>
+            <p>Paste text to preview regex masking for emails, phone numbers, and card-like numbers. Review the result before use.</p>
             
             <div class="terminal-window">
                 <div class="terminal-header">
                     <div class="dots">
                         <span></span><span></span><span></span>
                     </div>
-                    <div class="title">masker_cli — v1.0.0</div>
+                    <div class="title">masker_regex_preview</div>
                 </div>
                 <div class="terminal-body">
                     <div class="input-area">
                         <span class="prompt">></span>
-                        <textarea id="demo-input" placeholder="Paste text with emails, phones, or names here..."></textarea>
+                        <textarea id="demo-input" placeholder="Paste text with emails, phone numbers, or card-like numbers here..."></textarea>
                     </div>
                     <div class="output-area">
                         <div class="processing-line hidden">Scanning...</div>
@@ -95,18 +97,18 @@
             <div class="feature-grid">
                 <div class="feature-card">
                     <div class="icon">🔒</div>
-                    <h3>Privacy First</h3>
-                    <p>Stateless processing. No database. No logs. Your data never touches a disk.</p>
+                    <h3>Local Preview</h3>
+                    <p>Pasted text is processed by this page's client-side JavaScript and is not sent to the Masker API.</p>
                 </div>
                 <div class="feature-card">
                     <div class="icon">⚡</div>
-                    <h3>Ultra Fast</h3>
-                    <p>Optimized regex & lightweight NLP. Sub-20ms latency for real-time streams.</p>
+                    <h3>Three Regex Patterns</h3>
+                    <p>The preview highlights email addresses, phone numbers, and card-like 16-digit strings.</p>
                 </div>
                 <div class="feature-card">
                     <div class="icon">🌍</div>
-                    <h3>Multi-Language</h3>
-                    <p>Native support for English and Russian entity recognition out of the box.</p>
+                    <h3>Full API Source</h3>
+                    <p>Use the documentation to run the Python API locally and review its supported entities and deployment boundaries.</p>
                 </div>
             </div>
         </div>
@@ -116,7 +118,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-logo">MASKER</div>
-                <p>Built by KikuAI. Open Source.</p>
+                <p>Built by KikuAI. AGPL-3.0 source.</p>
             </div>
         </div>
     </footer>
