@@ -11,7 +11,7 @@
 - **Flexible Redaction**: Choose between masking (`***`) or placeholders (`<PERSON>`).
 - **Entity Filtering**: Select exactly which PII types to redact.
 - **Multi-Language**: Optimized for English and Russian.
-- **High Performance**: < 20ms response time for typical payloads.
+- **Detection Methods**: Regex patterns for email, phone, and card candidates; spaCy NER for person names.
 
 ---
 
@@ -19,10 +19,10 @@
 
 | Type | Description | Detection Method |
 |------|-------------|------------------|
-| `EMAIL` | Email addresses | Regex (100% accuracy) |
-| `PHONE` | International phone numbers | Regex (100% accuracy) |
-| `CARD` | Credit/debit card numbers | Regex + Luhn check |
-| `PERSON` | Person names | AI/NER (spaCy) |
+| `EMAIL` | Email addresses | Regex |
+| `PHONE` | International phone numbers | Regex |
+| `CARD` | Credit/debit card number candidates | Regex |
+| `PERSON` | Person names | spaCy NER |
 
 ---
 

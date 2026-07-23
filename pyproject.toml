@@ -3,17 +3,16 @@ name = "masker"
 version = "1.0.0"
 description = "PII Redaction & Text Anonymization API for LLMs"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "AGPL-3.0-only"}
 requires-python = ">=3.11"
 authors = [
     {name = "KikuAI"}
 ]
 keywords = ["pii", "redaction", "anonymization", "privacy", "llm", "fastapi"]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
     "Framework :: FastAPI",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Security",

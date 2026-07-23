@@ -49,10 +49,10 @@ Use this endpoint when you only need to identify PII without redacting it.
 
 ## Detected Entity Types
 
-- **EMAIL**: Email addresses (regex, 100% accuracy)
-- **PHONE**: Phone numbers (international formats, 100% accuracy)
-- **CARD**: Credit card numbers (regex + Luhn validation, 100% accuracy)
-- **PERSON**: Person names (spaCy NER, ~85% accuracy)
+- **EMAIL**: Email addresses (regex)
+- **PHONE**: Phone numbers (international formats, regex)
+- **CARD**: Credit card number candidates (regex)
+- **PERSON**: Person names (spaCy NER)
 
 ## Example Response
 

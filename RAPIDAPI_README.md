@@ -1,6 +1,6 @@
 # Masker - The PII Redaction Firewall
 
-Welcome to Masker. This guide will help you integrate high-performance PII redaction into your applications in minutes.
+Welcome to Masker. This guide will help you integrate PII redaction into your applications.
 
 ## 🚀 Quick Start
 Masker is designed to be dead simple. You send text, we return purged text.
@@ -98,8 +98,8 @@ Masker isn't just for flat text. You can send complex nested JSON objects, and w
 We automatically detect the following entities:
 *   `EMAIL` - Email addresses
 *   `PHONE` - International phone numbers
-*   `CARD` - Credit cards, debit cards (Luhn validated)
-*   `PERSON` - Person names (using Neural NER models)
+*   `CARD` - Credit and debit card number candidates detected with regex
+*   `PERSON` - Person-name candidates detected with spaCy NER
 
 You can restrict detection to specific types using the `entities` array:
 ```json
@@ -111,9 +111,8 @@ You can restrict detection to specific types using the `entities` array:
 
 ---
 
-## ⚡ Performance & Limits
-*   **Latency:** P95 < 50ms for typical inputs.
-*   **Batch Size:** Ensure payloads are < 5MB.
+## ⚡ Limits
+*   **Payload Size:** Requests are validated against the service's configured text and payload limits.
 *   **Concurrency:** Stateless architecture scales horozontally. Contact us for custom enterprise limits.
 
 ## 🔒 Security
